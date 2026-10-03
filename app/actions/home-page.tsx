@@ -1,5 +1,6 @@
 import { css } from 'remix/component'
 
+import { trackNumber, tracklist } from '../tracks.ts'
 import { Document } from './document.tsx'
 
 export function HomePage() {
@@ -74,13 +75,6 @@ function Masthead() {
   )
 }
 
-// Track titles for the album-back tracklist; durations are decorative.
-const TRACKS = [
-  { title: 'About', length: '4:12' },
-  { title: 'Blog', length: '7:31' },
-  { title: 'Projects', length: '10:06' },
-]
-
 function Tracklist() {
   return () => (
     <section
@@ -122,46 +116,52 @@ function Tracklist() {
           gap: '16px',
         })}
       >
-        {TRACKS.map((track, index) => (
-          <li
-            key={track.title}
-            mix={css({
-              display: 'flex',
-              alignItems: 'baseline',
-              gap: '16px',
-              fontSize: '16px',
-              lineHeight: 1.5,
-            })}
-          >
-            <span
+        {tracklist.map((track) => (
+          <li key={track.href}>
+            <a
+              href={track.href}
               mix={css({
-                flex: '0 0 28px',
-                fontFamily: 'var(--font-display)',
-                fontSize: '12px',
-                fontWeight: 700,
-                letterSpacing: '0.1em',
-                color: 'var(--accent)',
+                display: 'flex',
+                alignItems: 'baseline',
+                gap: '16px',
+                fontSize: '16px',
+                lineHeight: 1.5,
+                color: 'var(--text-primary)',
+                textDecoration: 'none',
+                transition: 'color 150ms ease',
+                '&:hover, &:focus-visible': { color: 'var(--accent)', outline: 'none' },
               })}
             >
-              {String(index + 1).padStart(2, '0')}
-            </span>
-            <span>{track.title}</span>
-            <span
-              aria-hidden="true"
-              mix={css({
-                flex: '1 1 auto',
-                borderBottom: '2px dotted var(--border)',
-                transform: 'translateY(-4px)',
-              })}
-            />
-            <span
-              mix={css({
-                color: 'var(--text-secondary)',
-                fontVariantNumeric: 'tabular-nums',
-              })}
-            >
-              {track.length}
-            </span>
+              <span
+                mix={css({
+                  flex: '0 0 28px',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  letterSpacing: '0.1em',
+                  color: 'var(--accent)',
+                })}
+              >
+                {trackNumber(track)}
+              </span>
+              <span>{track.title}</span>
+              <span
+                aria-hidden="true"
+                mix={css({
+                  flex: '1 1 auto',
+                  borderBottom: '2px dotted var(--border)',
+                  transform: 'translateY(-4px)',
+                })}
+              />
+              <span
+                mix={css({
+                  color: 'var(--text-secondary)',
+                  fontVariantNumeric: 'tabular-nums',
+                })}
+              >
+                {track.length}
+              </span>
+            </a>
           </li>
         ))}
       </ol>
