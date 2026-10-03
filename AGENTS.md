@@ -24,8 +24,9 @@ Refer to ./.agents/skills/remix/SKILL.md for the Remix mental model and how to f
 - `app/routes.ts` defines the shared route contract used by server and browser modules for type-safe hrefs
 - `app/router.ts` wires routes to controllers and installs the standard Remix component renderer used by actions
 - Put top-level route actions in `app/actions/controller.tsx`; add `app/actions/<route-key>/controller.tsx` for nested route maps. `app/actions/controller.test.ts` is the root controller's router smoke test
-- `app/actions/home-page.tsx` and `app/actions/document.tsx` render the route-owned starter UI
-- `app/actions/public/` contains the browser runtime entry and interactive prompt button
+- `app/tracks.ts` lists the tracklist pages (title, number, href); `app/actions/track-page.tsx` is their shared placeholder page
+- `app/actions/home-page.tsx` renders the home page; `app/actions/document.tsx` owns the HTML shell and the global October Rust theme (color tokens and fonts on `<body>`)
+- `app/actions/public/` contains the browser runtime entry (needed for HMR and any future client components)
 - `app/assets.ts` owns the server-side asset pipeline used by the asset route and render middleware
 - Root `public/` contains static files served unchanged from the app root
 
