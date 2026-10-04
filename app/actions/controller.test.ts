@@ -1,11 +1,16 @@
 import * as assert from 'remix/assert'
-import { describe, it } from 'remix/test'
+import { before, describe, it } from 'remix/test'
 
-import { router } from '../router.ts'
+import { createTestApp } from '../../test/router.ts'
 import { routes } from '../routes.ts'
 import { trackNumber, tracklist } from '../tracks.ts'
 
 describe('root controller', () => {
+  let router: Awaited<ReturnType<typeof createTestApp>>['router']
+  before(async () => {
+    router = (await createTestApp()).router
+  })
+
   it('GET / returns the home page', async () => {
     let response = await router.fetch(new URL(routes.home.href(), 'http://localhost'))
 

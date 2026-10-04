@@ -8,6 +8,10 @@ export interface DocumentProps {
   children?: RemixNode
   head?: RemixNode
   title?: string
+  // 'none' skips the October Rust fonts, colors, and dark color scheme so a section
+  // (like /groceries) can bring its own theme through `head` and `bodyClass`.
+  theme?: 'october-rust' | 'none'
+  bodyClass?: string
 }
 
 // Global theme sampled from Type O Negative's "October Rust" (1996) cover:
@@ -40,7 +44,8 @@ const DEFAULT_TITLE = readAppDisplayName('Samhain')
 
 export function Document(handle: Handle<DocumentProps>) {
   return () => {
-    let { children, head, title = DEFAULT_TITLE } = handle.props
+    let { children, head, title = DEFAULT_TITLE, theme = 'october-rust', bodyClass } = handle.props
+    let octoberRust = theme === 'october-rust'
     let { href, importMap, preloads } = scriptEntry
 
     return (
@@ -48,12 +53,16 @@ export function Document(handle: Handle<DocumentProps>) {
         <head>
           <meta charSet="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <meta name="color-scheme" content="dark" />
+          <meta name="color-scheme" content={octoberRust ? 'dark' : 'light'} />
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
           <title>{title}</title>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-          <link rel="stylesheet" href={FONTS_HREF} />
+          {octoberRust && (
+            <>
+              <link rel="preconnect" href="https://fonts.googleapis.com" />
+              <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+              <link rel="stylesheet" href={FONTS_HREF} />
+            </>
+          )}
           {head}
           <ImportMap value={importMap} />
           {preloads.map((preloadHref) => (
@@ -61,7 +70,9 @@ export function Document(handle: Handle<DocumentProps>) {
           ))}
           <script type="module" src={href}></script>
         </head>
-        <body mix={themeStyle}>{children}</body>
+        <body class={bodyClass} mix={octoberRust ? themeStyle : undefined}>
+          {children}
+        </body>
       </html>
     )
   }
