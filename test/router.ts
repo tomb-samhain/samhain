@@ -15,7 +15,11 @@ export interface TestApp {
   router: ReturnType<typeof createAppRouter>
   // Sends a request as a same-origin browser would (cop() rejects cross-site posts).
   fetch(path: string, init?: RequestInit & { cookie?: string }): Promise<Response>
-  post(path: string, fields: Record<string, string | string[]>, init?: { cookie?: string; json?: boolean }): Promise<Response>
+  post(
+    path: string,
+    fields: Record<string, string | string[]>,
+    init?: { cookie?: string; json?: boolean },
+  ): Promise<Response>
 }
 
 export async function createTestApp(options: { now?: () => number } = {}): Promise<TestApp> {
@@ -32,10 +36,16 @@ export async function createTestApp(options: { now?: () => number } = {}): Promi
     let headers = new Headers(rest.headers)
     if (cookie) headers.set('Cookie', cookie)
     if (rest.method && rest.method !== 'GET') headers.set('Sec-Fetch-Site', 'same-origin')
-    return router.fetch(new Request(new URL(path, ORIGIN), { ...rest, headers, redirect: 'manual' }))
+    return router.fetch(
+      new Request(new URL(path, ORIGIN), { ...rest, headers, redirect: 'manual' }),
+    )
   }
 
-  async function post(path: string, fields: Record<string, string | string[]>, init: { cookie?: string; json?: boolean } = {}) {
+  async function post(
+    path: string,
+    fields: Record<string, string | string[]>,
+    init: { cookie?: string; json?: boolean } = {},
+  ) {
     let body = new FormData()
     for (let [name, value] of Object.entries(fields)) {
       for (let v of Array.isArray(value) ? value : [value]) body.append(name, v)
@@ -60,14 +70,19 @@ export function getResponseCookie(response: Response, name = 'groceries_session'
 // Creates a user and returns a session cookie for them.
 export async function signIn(app: TestApp, email = 'cook@example.com') {
   let user = await createUser(app.db, email)
-  let response = await app.post(routes.groceries.auth.loginAction.href(), { email, password: TEST_PASSWORD })
+  let response = await app.post(routes.groceries.auth.loginAction.href(), {
+    email,
+    password: TEST_PASSWORD,
+  })
   assert.equal(response.status, 303)
   return { user, cookie: getResponseCookie(response) }
 }
 
 // Stores a fresh Kroger user token (as if the OAuth flow completed) plus credentials.
 export async function connectKroger(app: TestApp, userId: number) {
-  await app.db.create(krogerConfigs, { user_id: userId, client_id: 'cid', client_secret: 'csec' }).catch(() => {})
+  await app.db
+    .create(krogerConfigs, { user_id: userId, client_id: 'cid', client_secret: 'csec' })
+    .catch(() => {})
   await app.db.create(krogerTokens, {
     user_id: userId,
     grant_type: 'USER',

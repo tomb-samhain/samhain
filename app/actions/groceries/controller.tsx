@@ -10,7 +10,9 @@ export default createController(routes.groceries, {
   actions: {
     async orders(context) {
       let user = context.auth.identity
-      return context.render(<OrdersPage user={user} orders={await listRecentOrders(context.db, user.id)} />)
+      return context.render(
+        <OrdersPage user={user} orders={await listRecentOrders(context.db, user.id)} />,
+      )
     },
   },
 })

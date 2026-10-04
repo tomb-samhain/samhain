@@ -23,7 +23,11 @@ export const container = css({
 })
 
 const headerRow = css({ display: 'flex', height: '3.5rem', alignItems: 'center', gap: '0.5rem' })
-const brand = css({ fontWeight: 600, marginRight: '0.5rem', '@media (min-width: 768px)': { marginRight: '1rem' } })
+const brand = css({
+  fontWeight: 600,
+  marginRight: '0.5rem',
+  '@media (min-width: 768px)': { marginRight: '1rem' },
+})
 const desktopNav = css({
   display: 'none',
   alignItems: 'center',
@@ -53,7 +57,12 @@ export function GroceriesLayout(handle: Handle<GroceriesLayoutProps>) {
     let logoutHref = routes.groceries.auth.logout.href()
 
     return (
-      <Document title={title} theme="none" bodyClass="groceries" head={<link rel="stylesheet" href="/groceries/theme.css" />}>
+      <Document
+        title={title}
+        theme="none"
+        bodyClass="groceries"
+        head={<link rel="stylesheet" href="/groceries/theme.css" />}
+      >
         <div mix={css({ minHeight: '100vh', background: 'var(--background)' })}>
           <header mix={headerStyle}>
             <div mix={[container, headerRow]}>
@@ -65,7 +74,9 @@ export function GroceriesLayout(handle: Handle<GroceriesLayoutProps>) {
               </nav>
               {user && (
                 <div mix={desktopUser}>
-                  <span mix={css({ fontSize: '0.875rem', color: 'var(--muted-foreground)' })}>{user.email}</span>
+                  <span mix={css({ fontSize: '0.875rem', color: 'var(--muted-foreground)' })}>
+                    {user.email}
+                  </span>
                   <form method="post" action={logoutHref}>
                     <button type="submit" title="Sign out" mix={signOutButton}>
                       <LogOut />

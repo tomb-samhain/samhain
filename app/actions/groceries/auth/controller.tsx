@@ -19,28 +19,29 @@ function startSession(session: Session, userId: number) {
 export default createController(routes.groceries.auth, {
   actions: {
     login(context) {
-        let returnTo = safeReturnTo(context.url.searchParams.get('returnTo'))
-        if (context.auth.ok) return redirect(returnTo ?? routes.groceries.meals.index.href(), 303)
+      let returnTo = safeReturnTo(context.url.searchParams.get('returnTo'))
+      if (context.auth.ok) return redirect(returnTo ?? routes.groceries.meals.index.href(), 303)
 
-        let mode: LoginMode = context.url.searchParams.get('mode') === 'register' ? 'register' : 'signin'
-        return context.render(<LoginPage mode={mode} returnTo={returnTo} />)
+      let mode: LoginMode =
+        context.url.searchParams.get('mode') === 'register' ? 'register' : 'signin'
+      return context.render(<LoginPage mode={mode} returnTo={returnTo} />)
     },
 
     async loginAction(context) {
-        let email = formText(context.formData, 'email').trim()
-        let password = formText(context.formData, 'password')
-        let returnTo = safeReturnTo(context.formData.get('returnTo'))
+      let email = formText(context.formData, 'email').trim()
+      let password = formText(context.formData, 'password')
+      let returnTo = safeReturnTo(context.formData.get('returnTo'))
 
-        let user = email && password ? await authenticateUser(context.db, email, password) : null
-        if (!user) {
-          return context.render(
-            <LoginPage mode="signin" email={email} error="Invalid credentials" returnTo={returnTo} />,
-            { status: 400 },
-          )
-        }
+      let user = email && password ? await authenticateUser(context.db, email, password) : null
+      if (!user) {
+        return context.render(
+          <LoginPage mode="signin" email={email} error="Invalid credentials" returnTo={returnTo} />,
+          { status: 400 },
+        )
+      }
 
-        startSession(context.session, user.id)
-        return redirect(returnTo ?? routes.groceries.meals.index.href(), 303)
+      startSession(context.session, user.id)
+      return redirect(returnTo ?? routes.groceries.meals.index.href(), 303)
     },
 
     async register(context) {

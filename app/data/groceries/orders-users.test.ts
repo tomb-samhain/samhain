@@ -88,6 +88,9 @@ describe('passwords', () => {
 
   it('never verifies the unusable placeholder or a BCrypt hash', async () => {
     assert.equal(await verifyPassword('', UNUSABLE_PASSWORD_HASH), false)
-    assert.equal(await verifyPassword('pw', '$2a$10$abcdefghijklmnopqrstuuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012'), false)
+    assert.equal(
+      await verifyPassword('pw', '$2a$10$abcdefghijklmnopqrstuuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012'),
+      false,
+    )
   })
 })

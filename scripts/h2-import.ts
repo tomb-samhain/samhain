@@ -3,7 +3,15 @@ import { join } from 'node:path'
 import type { Database } from 'remix/data-table'
 
 import { UNUSABLE_PASSWORD_HASH } from '../app/data/groceries/passwords.ts'
-import { ingredients, krogerConfigs, krogerTokens, meals, orderMeals, orders, users } from '../app/data/groceries/tables.ts'
+import {
+  ingredients,
+  krogerConfigs,
+  krogerTokens,
+  meals,
+  orderMeals,
+  orders,
+  users,
+} from '../app/data/groceries/tables.ts'
 
 // Imports the Spring app's H2 data from CSVWRITE exports (docs/groceries-migration/MIGRATION.md §11).
 // IDs are preserved so bookmarked /groceries/meals/:id URLs keep working.
@@ -17,9 +25,18 @@ type Row = Record<string, string | null>
 
 export async function importH2Export(db: Database, dir: string): Promise<ImportReport> {
   let read = async (name: string) => parseCsv(await readFile(join(dir, `${name}.csv`), 'utf8'))
-  let [userRows, mealRows, ingredientRows, configRows, tokenRows, orderRows, orderMealRows] = await Promise.all(
-    ['app_users', 'meals', 'ingredients', 'kroger_config', 'kroger_tokens', 'orders', 'order_meals'].map(read),
-  )
+  let [userRows, mealRows, ingredientRows, configRows, tokenRows, orderRows, orderMealRows] =
+    await Promise.all(
+      [
+        'app_users',
+        'meals',
+        'ingredients',
+        'kroger_config',
+        'kroger_tokens',
+        'orders',
+        'order_meals',
+      ].map(read),
+    )
 
   for (let [name, table] of [
     ['groceries_users', users],
@@ -39,7 +56,11 @@ export async function importH2Export(db: Database, dir: string): Promise<ImportR
     let userIds = new Set<number>()
     for (let row of userRows) {
       let id = int(row.ID)
-      await tx.create(users, { id, email: text(row.USERNAME), password_hash: UNUSABLE_PASSWORD_HASH })
+      await tx.create(users, {
+        id,
+        email: text(row.USERNAME),
+        password_hash: UNUSABLE_PASSWORD_HASH,
+      })
       userIds.add(id)
       count('users')
     }
@@ -113,7 +134,11 @@ export async function importH2Export(db: Database, dir: string): Promise<ImportR
         skip(`order ${row.ID}: no owner`)
         continue
       }
-      await tx.create(orders, { id: int(row.ID), user_id: userId, created_at: timestamp(text(row.CREATED_AT)) })
+      await tx.create(orders, {
+        id: int(row.ID),
+        user_id: userId,
+        created_at: timestamp(text(row.CREATED_AT)),
+      })
       orderIds.add(int(row.ID))
       count('orders')
     }
@@ -159,7 +184,8 @@ export function parseCsv(input: string): Row[] {
       }
     } else {
       let end = i
-      while (end < input.length && input[end] !== ',' && input[end] !== '\n' && input[end] !== '\r') end++
+      while (end < input.length && input[end] !== ',' && input[end] !== '\n' && input[end] !== '\r')
+        end++
       let raw = input.slice(i, end)
       value = raw === '' ? null : raw
       i = end
@@ -179,12 +205,17 @@ export function parseCsv(input: string): Row[] {
   }
 
   let [header = [], ...rows] = records.filter((r) => !(r.length === 1 && r[0] === null))
-  return rows.map((values) => Object.fromEntries(header.map((name, index) => [name ?? '', values[index] ?? null])))
+  return rows.map((values) =>
+    Object.fromEntries(header.map((name, index) => [name ?? '', values[index] ?? null])),
+  )
 }
 
 // "2026-10-04 20:01:41.046341+00" → "2026-10-04T20:01:41.046Z"
 export function timestamp(value: string): string {
-  let match = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2}(?:\.\d+)?)(Z|[+-]\d{2}(?::?\d{2})?)?$/.exec(value.trim())
+  let match =
+    /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2}(?:\.\d+)?)(Z|[+-]\d{2}(?::?\d{2})?)?$/.exec(
+      value.trim(),
+    )
   if (!match) throw new Error(`Unrecognized timestamp: ${value}`)
   let [, date, time, zone = 'Z'] = match
   if (zone !== 'Z') {

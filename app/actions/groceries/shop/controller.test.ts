@@ -12,8 +12,16 @@ const r = routes.groceries.shop
 async function setup() {
   let app = await createTestApp()
   let { user, cookie } = await signIn(app)
-  let tacos = await createMealWith(app.db, user.id, 'Tacos', ['2 lb ground beef', '1 onion', 'salt'])
-  let chili = await createMealWith(app.db, user.id, 'Chili', ['1 lb ground beef', '2 Onion', '1 can beans'])
+  let tacos = await createMealWith(app.db, user.id, 'Tacos', [
+    '2 lb ground beef',
+    '1 onion',
+    'salt',
+  ])
+  let chili = await createMealWith(app.db, user.id, 'Chili', [
+    '1 lb ground beef',
+    '2 Onion',
+    '1 can beans',
+  ])
   return { app, user, cookie, tacos, chili }
 }
 
@@ -27,7 +35,10 @@ describe('shop page', () => {
     let html = await (await app.fetch(r.index.href(), { cookie })).text()
     assert.match(html, /<h1[^>]*>Shop<\/h1>/)
     assert.match(html, />Select Meals<\/h2>/)
-    assert.match(html, /name="meal" value="\d+"[^>]*\/?>(<!-- -->)?<span[^>]*>Chili<\/span><span[^>]*>3<\/span>/)
+    assert.match(
+      html,
+      /name="meal" value="\d+"[^>]*\/?>(<!-- -->)?<span[^>]*>Chili<\/span><span[^>]*>3<\/span>/,
+    )
     assert.match(html, /Select meals on the left to see consolidated ingredients\./)
     assert.match(html, />Update list<\/button>/)
   })
@@ -35,7 +46,10 @@ describe('shop page', () => {
   it('shows the empty state without meals', async () => {
     let app = await createTestApp()
     let { cookie } = await signIn(app)
-    assert.match(await (await app.fetch(r.index.href(), { cookie })).text(), /No meals yet\. Go to Meals to create some\./)
+    assert.match(
+      await (await app.fetch(r.index.href(), { cookie })).text(),
+      /No meals yet\. Go to Meals to create some\./,
+    )
   })
 
   it('consolidates the selected meals and checks them', async () => {
@@ -43,7 +57,9 @@ describe('shop page', () => {
     let html = await (await app.fetch(shopUrl(tacos, chili), { cookie })).text()
 
     assert.equal((html.match(/name="meal" value="\d+"[^>]* checked/g) ?? []).length, 2)
-    let cells = [...html.matchAll(/<tr[^>]*><td[^>]*>([^<]+)<\/td><td[^>]*>(?:<span[^>]*>([^<]+)<\/span>)/g)].map((m) => [m[1], m[2]])
+    let cells = [
+      ...html.matchAll(/<tr[^>]*><td[^>]*>([^<]+)<\/td><td[^>]*>(?:<span[^>]*>([^<]+)<\/span>)/g),
+    ].map((m) => [m[1], m[2]])
     assert.deepEqual(cells, [
       ['ground beef', '2 lb + 1 lb'],
       ['onion', '3'],
@@ -65,7 +81,10 @@ describe('shop page', () => {
 
   it('counts linked items and warns about unlinked ones and a missing Kroger connection', async () => {
     let { app, user, cookie, tacos, chili } = await setup()
-    await linkProductAcrossMeals(app.db, user.id, [tacos, chili], 'ground beef', { productId: '0001111', productName: 'Kroger Ground Beef' })
+    await linkProductAcrossMeals(app.db, user.id, [tacos, chili], 'ground beef', {
+      productId: '0001111',
+      productName: 'Kroger Ground Beef',
+    })
     let html = await (await app.fetch(shopUrl(tacos, chili), { cookie })).text()
 
     assert.match(html, /Add 1 item to Kroger Cart/)
@@ -76,7 +95,10 @@ describe('shop page', () => {
 
   it('enables the cart button once Kroger is connected', async () => {
     let { app, user, cookie, tacos } = await setup()
-    await linkProductAcrossMeals(app.db, user.id, [tacos], 'salt', { productId: '0003333', productName: 'Salt' })
+    await linkProductAcrossMeals(app.db, user.id, [tacos], 'salt', {
+      productId: '0003333',
+      productName: 'Salt',
+    })
     await connectKroger(app, user.id)
     let html = await (await app.fetch(shopUrl(tacos), { cookie })).text()
     assert.doesNotMatch(html, /Kroger account not connected/)
@@ -89,13 +111,20 @@ describe('shop link', () => {
     let { app, user, cookie, tacos, chili } = await setup()
     let response = await app.post(
       r.link.href(),
-      { name: 'onion', meal: [String(tacos), String(chili)], productId: '0002222', productName: 'Yellow Onion' },
+      {
+        name: 'onion',
+        meal: [String(tacos), String(chili)],
+        productId: '0002222',
+        productName: 'Yellow Onion',
+      },
       { cookie, json: true },
     )
     assert.deepEqual(await response.json(), { location: shopUrl(tacos, chili) })
 
     for (let id of [tacos, chili]) {
-      let onion = (await getMeal(app.db, user.id, id))!.ingredients.find((i) => i.name.toLowerCase() === 'onion')
+      let onion = (await getMeal(app.db, user.id, id))!.ingredients.find(
+        (i) => i.name.toLowerCase() === 'onion',
+      )
       assert.equal(onion?.kroger_product_name, 'Yellow Onion')
     }
   })
@@ -104,7 +133,11 @@ describe('shop link', () => {
     let { app, cookie } = await setup()
     let other = await signIn(app, 'other@example.com')
     let secret = await createMealWith(app.db, other.user.id, 'Secret', ['1 onion'])
-    let response = await app.post(r.link.href(), { name: 'onion', meal: String(secret), productId: 'x', productName: 'x' }, { cookie })
+    let response = await app.post(
+      r.link.href(),
+      { name: 'onion', meal: String(secret), productId: 'x', productName: 'x' },
+      { cookie },
+    )
     assert.equal(response.status, 404)
   })
 })
@@ -112,8 +145,14 @@ describe('shop link', () => {
 describe('shop cart', () => {
   it('adds linked, non-excluded items and records an order', async () => {
     let { app, user, cookie, tacos, chili } = await setup()
-    await linkProductAcrossMeals(app.db, user.id, [tacos, chili], 'ground beef', { productId: '0001111', productName: 'Beef' })
-    await linkProductAcrossMeals(app.db, user.id, [tacos], 'salt', { productId: '0003333', productName: 'Salt' })
+    await linkProductAcrossMeals(app.db, user.id, [tacos, chili], 'ground beef', {
+      productId: '0001111',
+      productName: 'Beef',
+    })
+    await linkProductAcrossMeals(app.db, user.id, [tacos], 'salt', {
+      productId: '0003333',
+      productName: 'Salt',
+    })
     await connectKroger(app, user.id)
 
     let response = await app.post(
@@ -140,7 +179,10 @@ describe('shop cart', () => {
 
   it('reports a missing Kroger connection without recording an order', async () => {
     let { app, user, cookie, tacos } = await setup()
-    await linkProductAcrossMeals(app.db, user.id, [tacos], 'salt', { productId: '0003333', productName: 'Salt' })
+    await linkProductAcrossMeals(app.db, user.id, [tacos], 'salt', {
+      productId: '0003333',
+      productName: 'Salt',
+    })
     let response = await app.post(r.cart.href(), { meal: String(tacos) }, { cookie, json: true })
     assert.equal(response.status, 409)
     assert.match((await response.json()).error, /not connected/)
@@ -149,13 +191,22 @@ describe('shop cart', () => {
 
   it('redirects back with a flash message without JavaScript', async () => {
     let { app, user, cookie, tacos } = await setup()
-    await linkProductAcrossMeals(app.db, user.id, [tacos], 'salt', { productId: '0003333', productName: 'Salt' })
+    await linkProductAcrossMeals(app.db, user.id, [tacos], 'salt', {
+      productId: '0003333',
+      productName: 'Salt',
+    })
     await connectKroger(app, user.id)
     let response = await app.post(r.cart.href(), { meal: String(tacos) }, { cookie })
     assert.equal(response.status, 303)
     assert.equal(response.headers.get('Location'), shopUrl(tacos))
 
-    let next = response.headers.getSetCookie().find((c) => c.startsWith('groceries_session='))!.split(';')[0]
-    assert.match(await (await app.fetch(shopUrl(tacos), { cookie: next })).text(), /Items added to cart/)
+    let next = response.headers
+      .getSetCookie()
+      .find((c) => c.startsWith('groceries_session='))!
+      .split(';')[0]
+    assert.match(
+      await (await app.fetch(shopUrl(tacos), { cookie: next })).text(),
+      /Items added to cart/,
+    )
   })
 })

@@ -1,7 +1,12 @@
 import { and, inList, type Database } from 'remix/data-table'
 
 import { isUniqueViolation } from './errors.ts'
-import { consolidate, normalizeIngredientName, parseIngredient, type ConsolidatedIngredient } from './ingredients.ts'
+import {
+  consolidate,
+  normalizeIngredientName,
+  parseIngredient,
+  type ConsolidatedIngredient,
+} from './ingredients.ts'
 import { ingredients, meals, type Ingredient } from './tables.ts'
 
 // Every function takes the signed-in user's id and treats another user's rows as missing,
@@ -25,7 +30,12 @@ export async function listMeals(db: Database, userId: number): Promise<MealSumma
   let rows = await db.findMany(meals, { where: { user_id: userId } })
   let counts = new Map<number, number>()
   if (rows.length > 0) {
-    let items = await db.findMany(ingredients, { where: inList('meal_id', rows.map((m) => m.id)) })
+    let items = await db.findMany(ingredients, {
+      where: inList(
+        'meal_id',
+        rows.map((m) => m.id),
+      ),
+    })
     for (let item of items) counts.set(item.meal_id, (counts.get(item.meal_id) ?? 0) + 1)
   }
 
@@ -34,14 +44,25 @@ export async function listMeals(db: Database, userId: number): Promise<MealSumma
     .sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }) || a.id - b.id)
 }
 
-export async function getMeal(db: Database, userId: number, mealId: number): Promise<MealDetail | null> {
+export async function getMeal(
+  db: Database,
+  userId: number,
+  mealId: number,
+): Promise<MealDetail | null> {
   let meal = await findOwnedMeal(db, userId, mealId)
   if (!meal) return null
-  let items = await db.findMany(ingredients, { where: { meal_id: meal.id }, orderBy: ['id', 'asc'] })
+  let items = await db.findMany(ingredients, {
+    where: { meal_id: meal.id },
+    orderBy: ['id', 'asc'],
+  })
   return { id: meal.id, name: meal.name, ingredients: items }
 }
 
-export async function createMeal(db: Database, userId: number, name: string): Promise<Result<{ id: number }>> {
+export async function createMeal(
+  db: Database,
+  userId: number,
+  name: string,
+): Promise<Result<{ id: number }>> {
   let trimmed = name.trim()
   if (!trimmed) return { ok: false, error: 'Enter a name for the meal.' }
   try {
@@ -53,7 +74,12 @@ export async function createMeal(db: Database, userId: number, name: string): Pr
   }
 }
 
-export async function renameMeal(db: Database, userId: number, mealId: number, name: string): Promise<Result | null> {
+export async function renameMeal(
+  db: Database,
+  userId: number,
+  mealId: number,
+  name: string,
+): Promise<Result | null> {
   let meal = await findOwnedMeal(db, userId, mealId)
   if (!meal) return null
   let trimmed = name.trim()
@@ -73,7 +99,12 @@ export async function deleteMeal(db: Database, userId: number, mealId: number): 
   return db.delete(meals, meal.id)
 }
 
-export async function addIngredient(db: Database, userId: number, mealId: number, raw: string): Promise<Result | null> {
+export async function addIngredient(
+  db: Database,
+  userId: number,
+  mealId: number,
+  raw: string,
+): Promise<Result | null> {
   let meal = await findOwnedMeal(db, userId, mealId)
   if (!meal) return null
   if (!raw.trim()) return { ok: false, error: 'Enter an ingredient.' }
@@ -116,12 +147,18 @@ export async function updateIngredient(
     await db.update(ingredients, ingredient.id, update)
     return { ok: true, value: undefined }
   } catch (error) {
-    if (isUniqueViolation(error)) return { ok: false, error: duplicateIngredientMessage(update.name ?? ingredient.name) }
+    if (isUniqueViolation(error))
+      return { ok: false, error: duplicateIngredientMessage(update.name ?? ingredient.name) }
     throw error
   }
 }
 
-export async function deleteIngredient(db: Database, userId: number, mealId: number, ingredientId: number): Promise<boolean> {
+export async function deleteIngredient(
+  db: Database,
+  userId: number,
+  mealId: number,
+  ingredientId: number,
+): Promise<boolean> {
   let ingredient = await findOwnedIngredient(db, userId, mealId, ingredientId)
   if (!ingredient) return false
   return db.delete(ingredients, ingredient.id)
@@ -187,7 +224,9 @@ export async function consolidateMeals(
 
   let all: Ingredient[] = []
   for (let meal of owned) {
-    all.push(...(await db.findMany(ingredients, { where: { meal_id: meal.id }, orderBy: ['id', 'asc'] })))
+    all.push(
+      ...(await db.findMany(ingredients, { where: { meal_id: meal.id }, orderBy: ['id', 'asc'] })),
+    )
   }
   return consolidate(all)
 }
@@ -206,7 +245,12 @@ async function findOwnedMeals(db: Database, userId: number, mealIds: number[]) {
   return ids.map((id) => byId.get(id)!)
 }
 
-async function findOwnedIngredient(db: Database, userId: number, mealId: number, ingredientId: number) {
+async function findOwnedIngredient(
+  db: Database,
+  userId: number,
+  mealId: number,
+  ingredientId: number,
+) {
   let meal = await findOwnedMeal(db, userId, mealId)
   if (!meal) return null
   return db.findOne(ingredients, { where: { id: ingredientId, meal_id: meal.id } })

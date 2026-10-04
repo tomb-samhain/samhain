@@ -16,7 +16,7 @@ try {
   let report = await importH2Export(db, dir)
   for (let [table, count] of Object.entries(report.imported)) console.log(`${table}: ${count}`)
   for (let reason of report.skipped) console.log(`skipped ${reason}`)
-  console.log('Import complete. Set the imported users\' passwords with scripts/set-password.ts.')
+  console.log("Import complete. Set the imported users' passwords with scripts/set-password.ts.")
 } finally {
   await db.close()
 }

@@ -24,12 +24,32 @@ export class FakeKroger {
   requests: Request[] = []
   bodies: string[] = []
   products: FakeProduct[] = [
-    { productId: '0001', description: 'Kroger Ground Beef', upc: '0001111', price: 5.99, imageUrl: 'https://img.test/beef.jpg' },
+    {
+      productId: '0001',
+      description: 'Kroger Ground Beef',
+      upc: '0001111',
+      price: 5.99,
+      imageUrl: 'https://img.test/beef.jpg',
+    },
     { productId: '0002', description: 'Yellow Onion', upc: '0002222', price: 0.89 },
   ]
   locations: FakeLocation[] = [
-    { locationId: '01400943', name: 'Kroger Midtown', addressLine1: '725 Ponce De Leon Ave', city: 'Atlanta', state: 'GA', zipCode: '30306' },
-    { locationId: '01400376', name: 'Kroger Edgewood', addressLine1: '1225 Caroline St', city: 'Atlanta', state: 'GA', zipCode: '30307' },
+    {
+      locationId: '01400943',
+      name: 'Kroger Midtown',
+      addressLine1: '725 Ponce De Leon Ave',
+      city: 'Atlanta',
+      state: 'GA',
+      zipCode: '30306',
+    },
+    {
+      locationId: '01400376',
+      name: 'Kroger Edgewood',
+      addressLine1: '1225 Caroline St',
+      city: 'Atlanta',
+      state: 'GA',
+      zipCode: '30307',
+    },
   ]
   cart: { upc: string; quantity: number }[] = []
   tokenCounter = 0
@@ -80,13 +100,22 @@ export class FakeKroger {
       if (this.productStatus !== 200) return new Response('error', { status: this.productStatus })
       let term = (url.searchParams.get('filter.term') ?? '').toLowerCase()
       let words = term.split(/\s+/).filter(Boolean)
-      let matches = this.products.filter((p) => words.some((w) => p.description.toLowerCase().includes(w)))
+      let matches = this.products.filter((p) =>
+        words.some((w) => p.description.toLowerCase().includes(w)),
+      )
       return Response.json({
         data: matches.map((p) => ({
           productId: p.productId,
           description: p.description,
-          items: [{ upc: p.upc, price: url.searchParams.has('filter.locationId') ? { regular: p.price } : undefined }],
-          images: p.imageUrl ? [{ perspective: 'front', sizes: [{ size: 'thumbnail', url: p.imageUrl }] }] : [],
+          items: [
+            {
+              upc: p.upc,
+              price: url.searchParams.has('filter.locationId') ? { regular: p.price } : undefined,
+            },
+          ],
+          images: p.imageUrl
+            ? [{ perspective: 'front', sizes: [{ size: 'thumbnail', url: p.imageUrl }] }]
+            : [],
         })),
       })
     }
@@ -96,7 +125,12 @@ export class FakeKroger {
         data: this.locations.map((l) => ({
           locationId: l.locationId,
           name: l.name,
-          address: { addressLine1: l.addressLine1, city: l.city, state: l.state, zipCode: l.zipCode },
+          address: {
+            addressLine1: l.addressLine1,
+            city: l.city,
+            state: l.state,
+            zipCode: l.zipCode,
+          },
         })),
       })
     }

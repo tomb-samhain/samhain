@@ -3,7 +3,11 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { KrogerError } from '../../../data/groceries/kroger.ts'
-import { currentUser, requireGroceriesUser, requireGroceriesUserJson } from '../../../middleware/groceries-auth.ts'
+import {
+  currentUser,
+  requireGroceriesUser,
+  requireGroceriesUserJson,
+} from '../../../middleware/groceries-auth.ts'
 import { routes } from '../../../routes.ts'
 
 export const SETTINGS_ERROR_FLASH = 'groceriesSettingsError'
@@ -27,7 +31,8 @@ export default createController(routes.groceries.kroger, {
           ])
           return Response.json({ products, hasLocation: Boolean(config?.location_id) })
         } catch (error) {
-          if (error instanceof KrogerError) return Response.json({ error: error.message }, { status: 409 })
+          if (error instanceof KrogerError)
+            return Response.json({ error: error.message }, { status: 409 })
           throw error
         }
       },
@@ -60,11 +65,17 @@ export default createController(routes.groceries.kroger, {
         }
 
         try {
-          let { result } = await finishExternalAuth(context.kroger.createOAuthProvider(userId, config), context)
+          let { result } = await finishExternalAuth(
+            context.kroger.createOAuthProvider(userId, config),
+            context,
+          )
           await context.kroger.saveUserTokens(userId, result.tokens)
         } catch (error) {
           let message = error instanceof Error ? error.message : 'Unknown error'
-          context.session.flash(SETTINGS_ERROR_FLASH, `Could not connect your Kroger account: ${message}`)
+          context.session.flash(
+            SETTINGS_ERROR_FLASH,
+            `Could not connect your Kroger account: ${message}`,
+          )
           return redirect(settingsHref(), 303)
         }
         return redirect(`${settingsHref()}?auth=success`, 303)

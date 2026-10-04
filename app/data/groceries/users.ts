@@ -14,7 +14,11 @@ export const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 
 export type RegisterResult = { ok: true; user: CurrentUser } | { ok: false; error: string }
 
-export async function registerUser(db: Database, email: string, password: string): Promise<RegisterResult> {
+export async function registerUser(
+  db: Database,
+  email: string,
+  password: string,
+): Promise<RegisterResult> {
   if (!EMAIL_PATTERN.test(email)) {
     return { ok: false, error: 'Username must be a valid email address' }
   }
@@ -35,7 +39,11 @@ export async function registerUser(db: Database, email: string, password: string
   }
 }
 
-export async function authenticateUser(db: Database, email: string, password: string): Promise<CurrentUser | null> {
+export async function authenticateUser(
+  db: Database,
+  email: string,
+  password: string,
+): Promise<CurrentUser | null> {
   let user = await findUserByEmail(db, email)
   if (!user || !(await verifyPassword(password, user.password_hash))) return null
   return toCurrentUser(user)

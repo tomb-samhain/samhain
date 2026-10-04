@@ -10,7 +10,11 @@ export interface OrderSummary {
 
 // Records the names of the user's meals in the requested order. Unknown or foreign
 // meal ids are skipped, as in OrderService.createOrder.
-export async function createOrder(db: Database, userId: number, mealIds: number[]): Promise<OrderSummary> {
+export async function createOrder(
+  db: Database,
+  userId: number,
+  mealIds: number[],
+): Promise<OrderSummary> {
   let rows = mealIds.length
     ? await db.findMany(meals, { where: and({ user_id: userId }, inList('id', mealIds)) })
     : []
@@ -26,7 +30,11 @@ export async function createOrder(db: Database, userId: number, mealIds: number[
   })
 }
 
-export async function listRecentOrders(db: Database, userId: number, limit = 5): Promise<OrderSummary[]> {
+export async function listRecentOrders(
+  db: Database,
+  userId: number,
+  limit = 5,
+): Promise<OrderSummary[]> {
   let rows = await db.findMany(orders, {
     where: { user_id: userId },
     orderBy: [
@@ -38,7 +46,10 @@ export async function listRecentOrders(db: Database, userId: number, limit = 5):
   if (rows.length === 0) return []
 
   let names = await db.findMany(orderMeals, {
-    where: inList('order_id', rows.map((row) => row.id)),
+    where: inList(
+      'order_id',
+      rows.map((row) => row.id),
+    ),
     orderBy: ['position', 'asc'],
   })
   return rows.map((row) => ({

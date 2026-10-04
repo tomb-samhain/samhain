@@ -34,7 +34,9 @@ export function LoginPage(handle: Handle<LoginPageProps>) {
   return () => {
     let { mode, email = '', error, returnTo } = handle.props
     let signin = mode === 'signin'
-    let action = signin ? routes.groceries.auth.loginAction.href() : routes.groceries.auth.register.href()
+    let action = signin
+      ? routes.groceries.auth.loginAction.href()
+      : routes.groceries.auth.register.href()
     let toggle = new URLSearchParams({ mode: signin ? 'register' : 'signin' })
     if (returnTo) toggle.set('returnTo', returnTo)
 
@@ -63,13 +65,26 @@ export function LoginPage(handle: Handle<LoginPageProps>) {
             })}
           >
             <div>
-              <h1 mix={css({ fontSize: '1.5rem', lineHeight: '2rem', fontWeight: 600 })}>{APP_TITLE}</h1>
-              <p mix={css({ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'var(--muted-foreground)', marginTop: '0.25rem' })}>
+              <h1 mix={css({ fontSize: '1.5rem', lineHeight: '2rem', fontWeight: 600 })}>
+                {APP_TITLE}
+              </h1>
+              <p
+                mix={css({
+                  fontSize: '0.875rem',
+                  lineHeight: '1.25rem',
+                  color: 'var(--muted-foreground)',
+                  marginTop: '0.25rem',
+                })}
+              >
                 {signin ? 'Sign in to your account' : 'Create a new account'}
               </p>
             </div>
 
-            <form method="post" action={action} mix={css({ display: 'flex', flexDirection: 'column', gap: '1rem' })}>
+            <form
+              method="post"
+              action={action}
+              mix={css({ display: 'flex', flexDirection: 'column', gap: '1rem' })}
+            >
               {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
               <div mix={field}>
                 <label for="username" mix={fieldLabel}>
@@ -101,7 +116,14 @@ export function LoginPage(handle: Handle<LoginPageProps>) {
               </div>
 
               {error && (
-                <p role="alert" mix={css({ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'var(--destructive)' })}>
+                <p
+                  role="alert"
+                  mix={css({
+                    fontSize: '0.875rem',
+                    lineHeight: '1.25rem',
+                    color: 'var(--destructive)',
+                  })}
+                >
                   {error}
                 </p>
               )}
@@ -114,7 +136,14 @@ export function LoginPage(handle: Handle<LoginPageProps>) {
               </PendingButton>
             </form>
 
-            <p mix={css({ fontSize: '0.875rem', lineHeight: '1.25rem', textAlign: 'center', color: 'var(--muted-foreground)' })}>
+            <p
+              mix={css({
+                fontSize: '0.875rem',
+                lineHeight: '1.25rem',
+                textAlign: 'center',
+                color: 'var(--muted-foreground)',
+              })}
+            >
               {signin ? 'No account? ' : 'Already have an account? '}
               <a href={`${routes.groceries.auth.login.href()}?${toggle}`} mix={toggleLink}>
                 {signin ? 'Register' : 'Sign In'}

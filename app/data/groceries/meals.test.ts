@@ -49,7 +49,10 @@ describe('meals data', () => {
 
   it('rejects a blank meal name', async () => {
     let { db, user } = await setup()
-    assert.deepEqual(await createMeal(db, user.id, '   '), { ok: false, error: 'Enter a name for the meal.' })
+    assert.deepEqual(await createMeal(db, user.id, '   '), {
+      ok: false,
+      error: 'Enter a name for the meal.',
+    })
   })
 
   it('reports a duplicate meal name instead of failing (source returned 500)', async () => {
@@ -68,7 +71,10 @@ describe('meals data', () => {
     let tacos = await createMealWith(db, user.id, 'Tacos')
     await createMealWith(db, user.id, 'Chili')
 
-    assert.deepEqual(await renameMeal(db, user.id, tacos, 'Street Tacos'), { ok: true, value: undefined })
+    assert.deepEqual(await renameMeal(db, user.id, tacos, 'Street Tacos'), {
+      ok: true,
+      value: undefined,
+    })
     assert.equal((await getMeal(db, user.id, tacos))?.name, 'Street Tacos')
     assert.equal((await renameMeal(db, user.id, tacos, 'Chili'))?.ok, false)
   })
@@ -83,7 +89,11 @@ describe('meals data', () => {
 
   it('parses ingredients and keeps insertion order', async () => {
     let { db, user } = await setup()
-    let tacos = await createMealWith(db, user.id, 'Tacos', ['2 lb ground beef', 'salt', '3 cloves garlic'])
+    let tacos = await createMealWith(db, user.id, 'Tacos', [
+      '2 lb ground beef',
+      'salt',
+      '3 cloves garlic',
+    ])
     let meal = await getMeal(db, user.id, tacos)
     assert.deepEqual(
       meal?.ingredients.map((i) => [i.name, i.quantity]),
@@ -122,9 +132,17 @@ describe('meals data', () => {
     let { db, user } = await setup()
     let tacos = await createMealWith(db, user.id, 'Tacos', ['1 onion'])
     let [onion] = (await getMeal(db, user.id, tacos))!.ingredients
-    assert.ok(await linkIngredient(db, user.id, tacos, onion.id, { productId: '0002222', productName: 'Yellow Onion' }))
+    assert.ok(
+      await linkIngredient(db, user.id, tacos, onion.id, {
+        productId: '0002222',
+        productName: 'Yellow Onion',
+      }),
+    )
     let [linked] = (await getMeal(db, user.id, tacos))!.ingredients
-    assert.deepEqual([linked.kroger_product_id, linked.kroger_product_name], ['0002222', 'Yellow Onion'])
+    assert.deepEqual(
+      [linked.kroger_product_id, linked.kroger_product_name],
+      ['0002222', 'Yellow Onion'],
+    )
   })
 
   it('links a product across meals by normalized name', async () => {
@@ -133,7 +151,12 @@ describe('meals data', () => {
     let chili = await createMealWith(db, user.id, 'Chili', ['2 Onion '])
     let soup = await createMealWith(db, user.id, 'Soup', ['1 onion'])
 
-    assert.ok(await linkProductAcrossMeals(db, user.id, [tacos, chili], 'onion', { productId: 'u1', productName: 'Onion' }))
+    assert.ok(
+      await linkProductAcrossMeals(db, user.id, [tacos, chili], 'onion', {
+        productId: 'u1',
+        productName: 'Onion',
+      }),
+    )
 
     let linked = async (mealId: number) =>
       (await getMeal(db, user.id, mealId))!.ingredients.map((i) => i.kroger_product_id)
@@ -145,7 +168,11 @@ describe('meals data', () => {
   it('consolidates meals in the requested order', async () => {
     let { db, user } = await setup()
     let tacos = await createMealWith(db, user.id, 'Tacos', ['2 lb ground beef', '1 onion', 'salt'])
-    let chili = await createMealWith(db, user.id, 'Chili', ['1 lb ground beef', '2 Onion', '1 can beans'])
+    let chili = await createMealWith(db, user.id, 'Chili', [
+      '1 lb ground beef',
+      '2 Onion',
+      '1 can beans',
+    ])
 
     let result = await consolidateMeals(db, user.id, [chili, tacos])
     assert.deepEqual(
@@ -173,8 +200,17 @@ describe('meals data', () => {
       assert.equal(await addIngredient(db, other.id, tacos, 'salt'), null)
       assert.equal(await updateIngredient(db, other.id, tacos, onion.id, { quantity: '9' }), null)
       assert.equal(await deleteIngredient(db, other.id, tacos, onion.id), false)
-      assert.equal(await linkIngredient(db, other.id, tacos, onion.id, { productId: 'x', productName: 'x' }), false)
-      assert.equal(await linkProductAcrossMeals(db, other.id, [tacos], 'onion', { productId: 'x', productName: 'x' }), false)
+      assert.equal(
+        await linkIngredient(db, other.id, tacos, onion.id, { productId: 'x', productName: 'x' }),
+        false,
+      )
+      assert.equal(
+        await linkProductAcrossMeals(db, other.id, [tacos], 'onion', {
+          productId: 'x',
+          productName: 'x',
+        }),
+        false,
+      )
       assert.equal(await consolidateMeals(db, other.id, [tacos]), null)
 
       let [unchanged] = (await getMeal(db, user.id, tacos))!.ingredients

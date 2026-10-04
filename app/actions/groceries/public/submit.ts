@@ -43,11 +43,16 @@ export async function send(
   }
 
   if (response.status === 401) {
-    window.location.assign(`/groceries/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`)
+    window.location.assign(
+      `/groceries/login?returnTo=${encodeURIComponent(location.pathname + location.search)}`,
+    )
     return { ok: false, error: 'Unauthorized' }
   }
 
-  let data = (await response.json().catch(() => null)) as { location?: string; error?: string } | null
+  let data = (await response.json().catch(() => null)) as {
+    location?: string
+    error?: string
+  } | null
   if (!response.ok || !data?.location) {
     return { ok: false, error: data?.error ?? `Request failed (${response.status})` }
   }
@@ -59,7 +64,10 @@ export async function send(
 export async function go(href: string) {
   let target = new URL(href, location.href)
   let same = target.pathname + target.search === location.pathname + location.search
-  await navigate(target.pathname + target.search, { history: same ? 'replace' : 'push', resetScroll: !same })
+  await navigate(target.pathname + target.search, {
+    history: same ? 'replace' : 'push',
+    resetScroll: !same,
+  })
 }
 
 export function submitForm(form: HTMLFormElement, signal?: AbortSignal, before?: () => void) {

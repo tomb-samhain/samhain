@@ -69,17 +69,34 @@ const mealCardBase = {
   '& > a::after': { content: '""', position: 'absolute', inset: 0, borderRadius: 'inherit' },
   '& > button': { position: 'relative', zIndex: 1 },
 } as const
-const mealCard = css({ ...mealCardBase, background: 'var(--card)', '&:hover': { background: 'var(--accent)' } })
+const mealCard = css({
+  ...mealCardBase,
+  background: 'var(--card)',
+  '&:hover': { background: 'var(--accent)' },
+})
 const mealCardSelected = css({
   ...mealCardBase,
   background: 'var(--primary)',
   color: 'var(--primary-foreground)',
   borderColor: 'var(--primary)',
 })
-const mealLink = css({ minWidth: 0, outline: 'none', '&:focus-visible::after': { boxShadow: '0 0 0 2px var(--ring)' } })
-const mealName = css({ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' })
+const mealLink = css({
+  minWidth: 0,
+  outline: 'none',
+  '&:focus-visible::after': { boxShadow: '0 0 0 2px var(--ring)' },
+})
+const mealName = css({
+  fontWeight: 500,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+})
 const mealCount = css({ fontSize: '0.75rem', lineHeight: '1rem', color: 'var(--muted-foreground)' })
-const mealCountSelected = css({ fontSize: '0.75rem', lineHeight: '1rem', color: alpha('var(--primary-foreground)', 70) })
+const mealCountSelected = css({
+  fontSize: '0.75rem',
+  lineHeight: '1rem',
+  color: alpha('var(--primary-foreground)', 70),
+})
 
 const backLink = css({
   flexShrink: 0,
@@ -115,7 +132,12 @@ const emptyPanel = css({
   gap: '0.75rem',
   padding: '1.5rem',
 })
-const emptyText = css({ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'var(--muted-foreground)', textAlign: 'center' })
+const emptyText = css({
+  fontSize: '0.875rem',
+  lineHeight: '1.25rem',
+  color: 'var(--muted-foreground)',
+  textAlign: 'center',
+})
 
 // MealsPage.tsx: meal list on the left, the selected meal's ingredients on the right.
 // The selection lives in the URL (/groceries/meals/:mealId) instead of component state.
@@ -123,13 +145,21 @@ export function MealsPage(handle: Handle<MealsPageProps>) {
   return () => {
     let { user, meals, selected, notFound = false, error } = handle.props
     let hasSelection = selected !== null || notFound
-    let returnTo = selected ? routes.groceries.meals.show.href({ mealId: selected.id }) : routes.groceries.meals.index.href()
+    let returnTo = selected
+      ? routes.groceries.meals.show.href({ mealId: selected.id })
+      : routes.groceries.meals.index.href()
 
     return (
-      <GroceriesLayout user={user} active="meals" title={selected ? `${selected.name} · 5 Minute Groceries` : undefined}>
+      <GroceriesLayout
+        user={user}
+        active="meals"
+        title={selected ? `${selected.name} · 5 Minute Groceries` : undefined}
+      >
         <div mix={layout}>
           <div mix={listColumn(hasSelection)}>
-            <div mix={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between' })}>
+            <div
+              mix={css({ display: 'flex', alignItems: 'center', justifyContent: 'space-between' })}
+            >
               <h1 mix={pageTitle}>Meals</h1>
               <NewMealButton action={routes.groceries.meals.create.href()} />
             </div>
@@ -140,7 +170,9 @@ export function MealsPage(handle: Handle<MealsPageProps>) {
             )}
             <div mix={listScroll}>
               {meals.length === 0 ? (
-                <p mix={[emptyText, css({ padding: '2rem 0' })]}>No meals yet. Click "New" to get started.</p>
+                <p mix={[emptyText, css({ padding: '2rem 0' })]}>
+                  No meals yet. Click "New" to get started.
+                </p>
               ) : (
                 meals.map((meal) => {
                   let isSelected = selected?.id === meal.id
@@ -149,7 +181,9 @@ export function MealsPage(handle: Handle<MealsPageProps>) {
                     <div key={meal.id} mix={isSelected ? mealCardSelected : mealCard}>
                       <a href={href} aria-current={isSelected ? 'page' : undefined} mix={mealLink}>
                         <p mix={mealName}>{meal.name}</p>
-                        <p mix={isSelected ? mealCountSelected : mealCount}>{pluralize(meal.ingredientCount, 'ingredient')}</p>
+                        <p mix={isSelected ? mealCountSelected : mealCount}>
+                          {pluralize(meal.ingredientCount, 'ingredient')}
+                        </p>
                       </a>
                       <MealCardMenu
                         menuId={`meal-menu-${meal.id}`}
@@ -184,7 +218,9 @@ export function MealsPage(handle: Handle<MealsPageProps>) {
             ) : (
               <div mix={emptyPanel}>
                 <UtensilsCrossed size={40} opacity={0.3} />
-                <p mix={css({ fontSize: '0.875rem', lineHeight: '1.25rem' })}>Select a meal to manage its ingredients</p>
+                <p mix={css({ fontSize: '0.875rem', lineHeight: '1.25rem' })}>
+                  Select a meal to manage its ingredients
+                </p>
               </div>
             )}
           </div>
@@ -202,13 +238,26 @@ function MealPanel(handle: Handle<{ meal: MealDetail }>) {
     return (
       <div mix={css({ display: 'flex', flexDirection: 'column', height: '100%' })}>
         <div mix={css({ marginBottom: '1rem' })}>
-          <h2 mix={css({ fontSize: '1.25rem', lineHeight: '1.75rem', fontWeight: 600 })}>{meal.name}</h2>
+          <h2 mix={css({ fontSize: '1.25rem', lineHeight: '1.75rem', fontWeight: 600 })}>
+            {meal.name}
+          </h2>
           <p mix={textSmMuted}>{pluralize(meal.ingredients.length, 'ingredient')}</p>
         </div>
         <div mix={[separator, css({ marginBottom: '0.75rem' })]} />
-        <AddIngredientForm action={routes.groceries.meals.addIngredient.href({ mealId: meal.id })} />
+        <AddIngredientForm
+          action={routes.groceries.meals.addIngredient.href({ mealId: meal.id })}
+        />
         <div mix={[separator, css({ marginBottom: '0.75rem' })]} />
-        <div mix={css({ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.125rem', paddingRight: '0.25rem' })}>
+        <div
+          mix={css({
+            flex: 1,
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.125rem',
+            paddingRight: '0.25rem',
+          })}
+        >
           {meal.ingredients.length === 0 ? (
             <p mix={[emptyText, css({ padding: '3rem 0' })]}>No ingredients yet.</p>
           ) : (

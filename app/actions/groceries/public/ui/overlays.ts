@@ -1,6 +1,11 @@
 // Positions a [popover] element next to its trigger, like Radix's Popper: below the
 // trigger, aligned to its start or end edge, flipped above when there is no room.
-export function placePopover(popover: HTMLElement, anchor: HTMLElement, align: 'start' | 'end' = 'start', offset = 4) {
+export function placePopover(
+  popover: HTMLElement,
+  anchor: HTMLElement,
+  align: 'start' | 'end' = 'start',
+  offset = 4,
+) {
   let rect = anchor.getBoundingClientRect()
   let width = popover.offsetWidth
   let height = popover.offsetHeight

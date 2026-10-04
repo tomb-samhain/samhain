@@ -18,7 +18,11 @@ async function start(t: TestContext) {
   let kroger = await fake.listen()
   t.after(() => kroger.close())
 
-  let router = createAppRouter({ db, sessionSecret: 'e2e-secret', kroger: { apiBase: kroger.apiBase } })
+  let router = createAppRouter({
+    db,
+    sessionSecret: 'e2e-secret',
+    kroger: { apiBase: kroger.apiBase },
+  })
   let page = await t.serve(await createTestServer(router.fetch))
   let errors: string[] = []
   page.on('pageerror', (error) => errors.push(String(error)))
@@ -83,7 +87,10 @@ describe('groceries end to end', () => {
 
     await page.getByRole('button', { name: 'Options for Street Tacos' }).click()
     await page.getByRole('menuitem', { name: 'Delete' }).click()
-    await page.getByRole('dialog', { name: 'Delete meal' }).getByRole('button', { name: 'Delete' }).click()
+    await page
+      .getByRole('dialog', { name: 'Delete meal' })
+      .getByRole('button', { name: 'Delete' })
+      .click()
     await page.getByText('No meals yet. Click "New" to get started.').waitFor()
     assert.equal(new URL(page.url()).pathname, routes.groceries.meals.index.href())
     assert.deepEqual(errors, [])
@@ -106,7 +113,10 @@ describe('groceries end to end', () => {
       for (let raw of items) {
         await page.getByPlaceholder('Add ingredient, e.g. "2 onions"').fill(raw)
         await page.getByPlaceholder('Add ingredient, e.g. "2 onions"').press('Enter')
-        await page.getByText(`${items.indexOf(raw as never) + 1} ingredient`, { exact: false }).first().waitFor()
+        await page
+          .getByText(`${items.indexOf(raw as never) + 1} ingredient`, { exact: false })
+          .first()
+          .waitFor()
       }
     }
 
@@ -139,22 +149,23 @@ describe('groceries end to end', () => {
     await page.getByRole('cell', { name: '1 lb + 2 lb' }).waitFor()
     await page.getByRole('button', { name: 'Add 1 item to Kroger Cart' }).waitFor()
 
-    let onionRow = page.getByRole('row').filter({ has: page.getByRole('cell', { name: 'onion', exact: true }) })
+    let onionRow = page
+      .getByRole('row')
+      .filter({ has: page.getByRole('cell', { name: 'onion', exact: true }) })
     await onionRow.getByRole('button', { name: 'Link product' }).click()
     await page.getByRole('button', { name: /Yellow Onion/ }).click()
     await page.getByRole('button', { name: 'Add 2 items to Kroger Cart' }).waitFor()
 
-    let saltRow = page.getByRole('row').filter({ has: page.getByRole('cell', { name: 'salt', exact: true }) })
+    let saltRow = page
+      .getByRole('row')
+      .filter({ has: page.getByRole('cell', { name: 'salt', exact: true }) })
     await saltRow.hover()
     await saltRow.getByTitle('Remove from cart').click()
     await page.getByText('Excluded from cart', { exact: true }).waitFor()
 
     await page.getByRole('button', { name: 'Add 2 items to Kroger Cart' }).click()
     await page.getByText('Items added to cart').waitFor()
-    assert.deepEqual(
-      fake.cart.map((item) => item.upc).sort(),
-      ['0001111', '0002222'],
-    )
+    assert.deepEqual(fake.cart.map((item) => item.upc).sort(), ['0001111', '0002222'])
 
     await page.getByRole('link', { name: 'Orders' }).click()
     await page.getByRole('heading', { name: 'Recent Orders' }).waitFor()
@@ -178,7 +189,9 @@ describe('groceries end to end', () => {
 
     await page.getByLabel('Password').fill('secret')
     await page.getByRole('button', { name: 'Sign In' }).click()
-    await page.getByText('No orders yet. Head to the Shop page to add meals to your cart.').waitFor()
+    await page
+      .getByText('No orders yet. Head to the Shop page to add meals to your cart.')
+      .waitFor()
     await waitForPath(page, routes.groceries.orders.href())
   })
 
@@ -201,7 +214,9 @@ describe('groceries end to end', () => {
     await page.getByRole('button', { name: 'Open menu' }).click()
     let sheet = page.getByRole('dialog', { name: 'Navigation menu' })
     await sheet.getByRole('link', { name: 'Orders' }).click()
-    await page.getByText('No orders yet. Head to the Shop page to add meals to your cart.').waitFor()
+    await page
+      .getByText('No orders yet. Head to the Shop page to add meals to your cart.')
+      .waitFor()
     assert.equal(await sheet.isVisible(), false)
     assert.deepEqual(errors, [])
   })

@@ -44,7 +44,9 @@ function qa<T extends Element = HTMLElement>(selector: string) {
 }
 
 function byText(root: ParentNode, selector: string, text: string) {
-  return [...root.querySelectorAll<HTMLElement>(selector)].find((node) => node.textContent?.trim() === text)
+  return [...root.querySelectorAll<HTMLElement>(selector)].find(
+    (node) => node.textContent?.trim() === text,
+  )
 }
 
 const ingredient = { id: 7, name: 'ground beef', quantity: '2 lb', productName: null }
@@ -61,11 +63,15 @@ describe('IngredientRow', () => {
     t.after(cleanup)
     assert.equal($('[title="Click to edit quantity"]')?.textContent, '2 lb')
     assert.ok(byText(document, 'span', 'ground beef'))
-    assert.ok([...document.querySelectorAll('button')].some((b) => b.textContent === 'Link product'))
+    assert.ok(
+      [...document.querySelectorAll('button')].some((b) => b.textContent === 'Link product'),
+    )
   })
 
   it('shows "+ qty" when there is no quantity', (t) => {
-    let { $, cleanup } = render(<IngredientRow ingredient={{ ...ingredient, quantity: null }} {...rowProps} />)
+    let { $, cleanup } = render(
+      <IngredientRow ingredient={{ ...ingredient, quantity: null }} {...rowProps} />,
+    )
     t.after(cleanup)
     assert.equal($('[title="Add quantity"]')?.textContent, '+ qty')
   })
@@ -79,13 +85,17 @@ describe('IngredientRow', () => {
     assert.equal(input.value, '2 lb')
     assert.equal(document.activeElement, input)
 
-    await act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })))
+    await act(() =>
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })),
+    )
     assert.equal($('input[aria-label="Quantity"]'), null)
     assert.equal($('[title="Click to edit quantity"]')?.textContent, '2 lb')
   })
 
   it('posts the new quantity as JSON-accepting form data and shows server errors', async (t) => {
-    let calls = mockFetch(t, () => Response.json({ error: 'Enter an ingredient name.' }, { status: 400 }))
+    let calls = mockFetch(t, () =>
+      Response.json({ error: 'Enter an ingredient name.' }, { status: 400 }),
+    )
     let { $, act, cleanup } = render(<IngredientRow ingredient={ingredient} {...rowProps} />)
     t.after(cleanup)
 
@@ -93,7 +103,9 @@ describe('IngredientRow', () => {
     let input = q<HTMLInputElement>('input[aria-label="Quantity"]')!
     input.value = '3 lb'
     input.dispatchEvent(new Event('input', { bubbles: true }))
-    await act(() => input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })))
+    await act(() =>
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })),
+    )
     await settle(act)
 
     assert.equal(calls.length, 1)
@@ -118,11 +130,18 @@ describe('IngredientRow', () => {
   })
 
   it('shows the linked product name instead of the link button', (t) => {
-    let { cleanup } = render(<IngredientRow ingredient={{ ...ingredient, productName: 'Kroger Ground Beef' }} {...rowProps} />)
+    let { cleanup } = render(
+      <IngredientRow
+        ingredient={{ ...ingredient, productName: 'Kroger Ground Beef' }}
+        {...rowProps}
+      />,
+    )
     t.after(cleanup)
     assert.ok(byText(document, 'span', 'Kroger Ground Beef'))
     assert.ok(document.querySelector('[title="Change product"]'))
-    assert.ok(![...document.querySelectorAll('button')].some((b) => b.textContent === 'Link product'))
+    assert.ok(
+      ![...document.querySelectorAll('button')].some((b) => b.textContent === 'Link product'),
+    )
   })
 })
 
@@ -151,7 +170,9 @@ describe('NewMealButton', () => {
   })
 
   it('keeps the dialog open and shows a duplicate-name error', async (t) => {
-    mockFetch(t, () => Response.json({ error: 'You already have a meal named "Tacos".' }, { status: 400 }))
+    mockFetch(t, () =>
+      Response.json({ error: 'You already have a meal named "Tacos".' }, { status: 400 }),
+    )
     let { $, act, cleanup } = render(<NewMealButton action="/groceries/meals" />)
     t.after(cleanup)
 
@@ -201,7 +222,10 @@ describe('MealCardMenu', () => {
     assert.equal(rename.open, true)
     assert.match(rename.textContent ?? '', /Enter a new name for "Chili"\./)
     assert.equal(rename.querySelector<HTMLInputElement>('input[name="name"]')?.value, 'Chili')
-    assert.equal(rename.querySelector<HTMLInputElement>('input[name="returnTo"]')?.value, '/groceries')
+    assert.equal(
+      rename.querySelector<HTMLInputElement>('input[name="returnTo"]')?.value,
+      '/groceries',
+    )
   })
 
   it('asks for confirmation before deleting', async (t) => {
@@ -212,6 +236,9 @@ describe('MealCardMenu', () => {
 
     let remove = [...qa<HTMLDialogElement>('dialog')][1]
     assert.equal(remove.open, true)
-    assert.match(remove.textContent ?? '', /Are you sure you want to delete "Chili"\? This cannot be undone\./)
+    assert.match(
+      remove.textContent ?? '',
+      /Are you sure you want to delete "Chili"\? This cannot be undone\./,
+    )
   })
 })

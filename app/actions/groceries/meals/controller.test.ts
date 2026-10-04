@@ -19,7 +19,10 @@ describe('meals page', () => {
     let app = await createTestApp()
     let response = await app.fetch(r.show.href({ mealId: 3 }))
     assert.equal(response.status, 303)
-    assert.equal(response.headers.get('Location'), '/groceries/login?returnTo=%2Fgroceries%2Fmeals%2F3')
+    assert.equal(
+      response.headers.get('Location'),
+      '/groceries/login?returnTo=%2Fgroceries%2Fmeals%2F3',
+    )
   })
 
   it('shows the empty state', async () => {
@@ -33,12 +36,19 @@ describe('meals page', () => {
 
   it('lists meals by name with singular and plural ingredient counts', async () => {
     let { app, user, cookie } = await setup()
-    await createMealWith(app.db, user.id, 'Tacos', ['2 lb ground beef', '1 onion', 'salt', '1/2 cup salsa'])
+    await createMealWith(app.db, user.id, 'Tacos', [
+      '2 lb ground beef',
+      '1 onion',
+      'salt',
+      '1/2 cup salsa',
+    ])
     await createMealWith(app.db, user.id, 'Chili', ['2 Onion'])
     await createMealWith(app.db, user.id, 'apple pie')
     let html = await (await app.fetch(r.index.href(), { cookie })).text()
 
-    let names = [...html.matchAll(/href="\/groceries\/meals\/\d+"[^>]*><p[^>]*>([^<]+)<\/p><p[^>]*>([^<]+)</g)].map((m) => [m[1], m[2]])
+    let names = [
+      ...html.matchAll(/href="\/groceries\/meals\/\d+"[^>]*><p[^>]*>([^<]+)<\/p><p[^>]*>([^<]+)</g),
+    ].map((m) => [m[1], m[2]])
     assert.deepEqual(names, [
       ['apple pie', '0 ingredients'],
       ['Chili', '1 ingredient'],
@@ -66,10 +76,13 @@ describe('meals page', () => {
   it('shows "No ingredients yet." for an empty meal', async () => {
     let { app, user, cookie } = await setup()
     let soup = await createMealWith(app.db, user.id, 'Soup')
-    assert.match(await (await app.fetch(r.show.href({ mealId: soup }), { cookie })).text(), /No ingredients yet\./)
+    assert.match(
+      await (await app.fetch(r.show.href({ mealId: soup }), { cookie })).text(),
+      /No ingredients yet\./,
+    )
   })
 
-  it('returns 404 for a missing meal and for another user\'s meal', async () => {
+  it("returns 404 for a missing meal and for another user's meal", async () => {
     let { app, cookie } = await setup()
     let other = await signIn(app, 'other@example.com')
     let secret = await createMealWith(app.db, other.user.id, 'Secret', ['1 truffle'])
@@ -118,7 +131,11 @@ describe('meal mutations', () => {
   it('renames a meal and returns to the page the user was on', async () => {
     let { app, user, cookie } = await setup()
     let tacos = await createMealWith(app.db, user.id, 'Tacos')
-    let response = await app.post(r.rename.href({ mealId: tacos }), { name: 'Street Tacos', returnTo: '/groceries' }, { cookie })
+    let response = await app.post(
+      r.rename.href({ mealId: tacos }),
+      { name: 'Street Tacos', returnTo: '/groceries' },
+      { cookie },
+    )
     assert.equal(response.headers.get('Location'), '/groceries')
     assert.equal((await getMeal(app.db, user.id, tacos))?.name, 'Street Tacos')
   })
@@ -128,10 +145,18 @@ describe('meal mutations', () => {
     let tacos = await createMealWith(app.db, user.id, 'Tacos')
     let chili = await createMealWith(app.db, user.id, 'Chili')
 
-    let fromOther = await app.post(r.destroy.href({ mealId: tacos }), { returnTo: r.show.href({ mealId: chili }) }, { cookie })
+    let fromOther = await app.post(
+      r.destroy.href({ mealId: tacos }),
+      { returnTo: r.show.href({ mealId: chili }) },
+      { cookie },
+    )
     assert.equal(fromOther.headers.get('Location'), r.show.href({ mealId: chili }))
 
-    let fromSelf = await app.post(r.destroy.href({ mealId: chili }), { returnTo: r.show.href({ mealId: chili }) }, { cookie })
+    let fromSelf = await app.post(
+      r.destroy.href({ mealId: chili }),
+      { returnTo: r.show.href({ mealId: chili }) },
+      { cookie },
+    )
     assert.equal(fromSelf.headers.get('Location'), r.index.href())
     assert.equal(await getMeal(app.db, user.id, chili), null)
   })
@@ -139,7 +164,11 @@ describe('meal mutations', () => {
   it('parses and adds an ingredient', async () => {
     let { app, user, cookie } = await setup()
     let tacos = await createMealWith(app.db, user.id, 'Tacos')
-    let response = await app.post(r.addIngredient.href({ mealId: tacos }), { raw: '3 cloves garlic' }, { cookie })
+    let response = await app.post(
+      r.addIngredient.href({ mealId: tacos }),
+      { raw: '3 cloves garlic' },
+      { cookie },
+    )
     assert.equal(response.headers.get('Location'), r.show.href({ mealId: tacos }))
     let [garlic] = (await getMeal(app.db, user.id, tacos))!.ingredients
     assert.deepEqual([garlic.name, garlic.quantity], ['garlic', '3 cloves'])
@@ -151,9 +180,17 @@ describe('meal mutations', () => {
     let [onion] = (await getMeal(app.db, user.id, tacos))!.ingredients
     let params = { mealId: tacos, ingredientId: onion.id }
 
-    await app.post(r.updateIngredient.href(params), { name: 'red onion', quantity: '2' }, { cookie })
+    await app.post(
+      r.updateIngredient.href(params),
+      { name: 'red onion', quantity: '2' },
+      { cookie },
+    )
     await app.post(r.updateIngredient.href(params), { quantity: '' }, { cookie })
-    await app.post(r.linkIngredient.href(params), { productId: '0002222', productName: 'Yellow Onion' }, { cookie })
+    await app.post(
+      r.linkIngredient.href(params),
+      { productId: '0002222', productName: 'Yellow Onion' },
+      { cookie },
+    )
     let [updated] = (await getMeal(app.db, user.id, tacos))!.ingredients
     assert.deepEqual(
       [updated.name, updated.quantity, updated.kroger_product_id, updated.kroger_product_name],
@@ -187,7 +224,10 @@ describe('meal mutations', () => {
 
     let meal = await getMeal(app.db, other.user.id, secret)
     assert.equal(meal?.name, 'Secret')
-    assert.deepEqual(meal?.ingredients.map((i) => [i.quantity, i.kroger_product_id]), [['1', null]])
+    assert.deepEqual(
+      meal?.ingredients.map((i) => [i.quantity, i.kroger_product_id]),
+      [['1', null]],
+    )
   })
 
   it('returns JSON 401 to signed-out client entries', async () => {

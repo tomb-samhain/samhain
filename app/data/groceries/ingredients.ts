@@ -1,10 +1,36 @@
 // Ported from MealService.parseIngredient / consolidateIngredients in the Spring app.
 
 const UNITS = new Set([
-  'lb', 'lbs', 'oz', 'g', 'kg', 'cup', 'cups', 'tsp', 'tbsp',
-  'ml', 'l', 'liter', 'litre', 'gallon', 'gallons', 'quart', 'quarts',
-  'pint', 'pints', 'fl', 'bunch', 'clove', 'cloves', 'slice', 'slices',
-  'can', 'cans', 'pkg', 'package', 'packages',
+  'lb',
+  'lbs',
+  'oz',
+  'g',
+  'kg',
+  'cup',
+  'cups',
+  'tsp',
+  'tbsp',
+  'ml',
+  'l',
+  'liter',
+  'litre',
+  'gallon',
+  'gallons',
+  'quart',
+  'quarts',
+  'pint',
+  'pints',
+  'fl',
+  'bunch',
+  'clove',
+  'cloves',
+  'slice',
+  'slices',
+  'can',
+  'cans',
+  'pkg',
+  'package',
+  'packages',
 ])
 
 export interface ParsedIngredient {
@@ -47,7 +73,10 @@ export function normalizeIngredientName(name: string) {
 // Ingredients must arrive in meal order, then insertion order. Groups keep first-seen
 // order and are named by their normalized key; the last linked product wins.
 export function consolidate(items: Iterable<IngredientLike>): ConsolidatedIngredient[] {
-  let groups = new Map<string, { quantities: (string | null)[]; productId: string | null; productName: string | null }>()
+  let groups = new Map<
+    string,
+    { quantities: (string | null)[]; productId: string | null; productName: string | null }
+  >()
 
   for (let item of items) {
     let key = normalizeIngredientName(item.name)

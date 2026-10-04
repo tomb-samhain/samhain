@@ -40,7 +40,11 @@ export function ShopPage(handle: Handle<ShopPageProps>) {
               <h2 mix={sectionLabel}>Select Meals</h2>
               <MealSelector
                 action={routes.groceries.shop.index.href()}
-                meals={meals.map(({ id, name, ingredientCount }) => ({ id, name, ingredientCount }))}
+                meals={meals.map(({ id, name, ingredientCount }) => ({
+                  id,
+                  name,
+                  ingredientCount,
+                }))}
                 selectedIds={selectedIds}
               />
             </div>

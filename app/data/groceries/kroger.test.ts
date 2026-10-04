@@ -29,25 +29,41 @@ function inSeconds(seconds: number) {
 describe('Kroger client token', () => {
   it('returns a cached token when not yet expired', async () => {
     let { db, user, fake, kroger } = await setup()
-    await db.create(krogerTokens, { user_id: user.id, grant_type: 'CLIENT', access_token: 'cached-token', expires_at: inSeconds(300) })
+    await db.create(krogerTokens, {
+      user_id: user.id,
+      grant_type: 'CLIENT',
+      access_token: 'cached-token',
+      expires_at: inSeconds(300),
+    })
     assert.equal(await kroger.getValidClientToken(user.id), 'cached-token')
     assert.equal(fake.requests.length, 0)
   })
 
   it('fails with "Kroger not configured" without credentials', async () => {
     let { user, kroger } = await setup({ configured: false })
-    await assert.rejects(kroger.getValidClientToken(user.id), new KrogerError('Kroger not configured'))
+    await assert.rejects(
+      kroger.getValidClientToken(user.id),
+      new KrogerError('Kroger not configured'),
+    )
   })
 
   it('treats a token expiring within 60s as expired and fetches a new one', async () => {
     let { db, user, fake, kroger } = await setup()
-    await db.create(krogerTokens, { user_id: user.id, grant_type: 'CLIENT', access_token: 'stale-token', expires_at: inSeconds(30) })
+    await db.create(krogerTokens, {
+      user_id: user.id,
+      grant_type: 'CLIENT',
+      access_token: 'stale-token',
+      expires_at: inSeconds(30),
+    })
 
     let token = await kroger.getValidClientToken(user.id)
     assert.equal(token, 'client_credentials-access-1')
 
     let [request] = fake.requestsTo('/connect/oauth2/token')
-    assert.equal(request.headers.get('Authorization'), `Basic ${Buffer.from('cid:csec').toString('base64')}`)
+    assert.equal(
+      request.headers.get('Authorization'),
+      `Basic ${Buffer.from('cid:csec').toString('base64')}`,
+    )
     assert.equal(fake.bodies[0], 'grant_type=client_credentials&scope=product.compact')
 
     let saved = await db.find(krogerTokens, { user_id: user.id, grant_type: 'CLIENT' })
@@ -58,7 +74,12 @@ describe('Kroger client token', () => {
 describe('Kroger user token', () => {
   it('returns a cached user token when not yet expired', async () => {
     let { db, user, kroger } = await setup()
-    await db.create(krogerTokens, { user_id: user.id, grant_type: 'USER', access_token: 'user-token', expires_at: inSeconds(600) })
+    await db.create(krogerTokens, {
+      user_id: user.id,
+      grant_type: 'USER',
+      access_token: 'user-token',
+      expires_at: inSeconds(600),
+    })
     assert.equal(await kroger.getValidUserToken(user.id), 'user-token')
   })
 
@@ -69,7 +90,12 @@ describe('Kroger user token', () => {
 
   it('fails when expired with no refresh token', async () => {
     let { db, user, kroger } = await setup()
-    await db.create(krogerTokens, { user_id: user.id, grant_type: 'USER', access_token: 'old', expires_at: inSeconds(-60) })
+    await db.create(krogerTokens, {
+      user_id: user.id,
+      grant_type: 'USER',
+      access_token: 'old',
+      expires_at: inSeconds(-60),
+    })
     await assert.rejects(kroger.getValidUserToken(user.id), /refresh token/)
   })
 
@@ -100,7 +126,10 @@ describe('Kroger user token', () => {
       expires_at: inSeconds(-60),
     })
 
-    await assert.rejects(kroger.getValidUserToken(user.id), /Kroger session expired — please reconnect in Settings/)
+    await assert.rejects(
+      kroger.getValidUserToken(user.id),
+      /Kroger session expired — please reconnect in Settings/,
+    )
     assert.equal(await db.find(krogerTokens, { user_id: user.id, grant_type: 'USER' }), null)
   })
 
@@ -117,7 +146,11 @@ describe('Kroger user token', () => {
     })
     assert.equal(await kroger.hasUserToken(user.id), true)
 
-    await db.update(krogerTokens, { user_id: user.id, grant_type: 'USER' }, { expires_at: inSeconds(-60) })
+    await db.update(
+      krogerTokens,
+      { user_id: user.id, grant_type: 'USER' },
+      { expires_at: inSeconds(-60) },
+    )
     fake.refreshStatus = 401
     assert.equal(await kroger.hasUserToken(user.id), false)
   })
@@ -130,7 +163,13 @@ describe('Kroger API', () => {
 
     let products = await kroger.searchProducts(user.id, 'beef')
     assert.deepEqual(products, [
-      { productId: '0001', description: 'Kroger Ground Beef', upc: '0001111', price: 5.99, imageUrl: 'https://img.test/beef.jpg' },
+      {
+        productId: '0001',
+        description: 'Kroger Ground Beef',
+        upc: '0001111',
+        price: 5.99,
+        imageUrl: 'https://img.test/beef.jpg',
+      },
     ])
     let url = new URL(fake.requestsTo('/products')[0].url)
     assert.equal(url.searchParams.get('filter.term'), 'beef')
@@ -157,14 +196,25 @@ describe('Kroger API', () => {
       state: 'GA',
       zipCode: '30306',
     })
-    assert.equal(new URL(fake.requestsTo('/locations')[0].url).searchParams.get('filter.zipCode.near'), '30306')
+    assert.equal(
+      new URL(fake.requestsTo('/locations')[0].url).searchParams.get('filter.zipCode.near'),
+      '30306',
+    )
   })
 
   it('adds items to the cart with the user token', async () => {
     let { db, user, fake, kroger } = await setup()
-    await db.create(krogerTokens, { user_id: user.id, grant_type: 'USER', access_token: 'user-token', expires_at: inSeconds(600) })
+    await db.create(krogerTokens, {
+      user_id: user.id,
+      grant_type: 'USER',
+      access_token: 'user-token',
+      expires_at: inSeconds(600),
+    })
 
-    assert.equal(await kroger.addToCart(user.id, [{ upc: '0001111', quantity: 1 }]), 'Items added to cart')
+    assert.equal(
+      await kroger.addToCart(user.id, [{ upc: '0001111', quantity: 1 }]),
+      'Items added to cart',
+    )
     assert.equal(fake.requestsTo('/cart/add')[0].headers.get('Authorization'), 'Bearer user-token')
     assert.deepEqual(fake.cart, [{ upc: '0001111', quantity: 1 }])
   })

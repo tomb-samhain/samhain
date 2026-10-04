@@ -14,7 +14,12 @@ export const navItems: { key: NavKey; label: string; href: string }[] = [
   { key: 'settings', label: 'Settings', href: routes.groceries.settings.index.href() },
 ]
 
-const icons = { meals: UtensilsCrossed, shop: ShoppingCart, orders: ClipboardList, settings: Settings }
+const icons = {
+  meals: UtensilsCrossed,
+  shop: ShoppingCart,
+  orders: ClipboardList,
+  settings: Settings,
+}
 
 const navItemBase = {
   display: 'flex',
@@ -29,7 +34,11 @@ const navItemBase = {
   transitionDuration: '150ms',
 }
 
-const activeStyle = css({ ...navItemBase, background: 'var(--primary)', color: 'var(--primary-foreground)' })
+const activeStyle = css({
+  ...navItemBase,
+  background: 'var(--primary)',
+  color: 'var(--primary-foreground)',
+})
 const inactiveStyle = css({
   ...navItemBase,
   color: 'var(--muted-foreground)',
@@ -41,7 +50,11 @@ export function NavItem(handle: Handle<{ item: (typeof navItems)[number]; active
     let { item, active } = handle.props
     let Icon = icons[item.key]
     return (
-      <a href={item.href} aria-current={active ? 'page' : undefined} mix={active ? activeStyle : inactiveStyle}>
+      <a
+        href={item.href}
+        aria-current={active ? 'page' : undefined}
+        mix={active ? activeStyle : inactiveStyle}
+      >
         <Icon />
         {item.label}
       </a>

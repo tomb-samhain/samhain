@@ -3,7 +3,14 @@ import type { Handle, RemixNode } from 'remix/component'
 
 import { Loader, Search } from './ui/icons.tsx'
 import { placePopover } from './ui/overlays.ts'
-import { button, input, popoverContent, textXsDestructive, textXsMuted, type ButtonOptions } from './ui/styles.ts'
+import {
+  button,
+  input,
+  popoverContent,
+  textXsDestructive,
+  textXsMuted,
+  type ButtonOptions,
+} from './ui/styles.ts'
 
 export interface Product {
   productId: string
@@ -25,11 +32,27 @@ export interface ProductSearchProps {
   onSelect(product: Product): void
 }
 
-const contentStyle = popoverContent({ width: '20rem', maxWidth: 'calc(100vw - 2rem)', padding: '0.75rem' })
+const contentStyle = popoverContent({
+  width: '20rem',
+  maxWidth: 'calc(100vw - 2rem)',
+  padding: '0.75rem',
+})
 const searchInput = input({ height: '2rem', fontSize: '0.875rem' })
 const searchButton = button({ variant: 'outline', size: 'sm' })
-const resultsList = css({ maxHeight: '13rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.25rem' })
-const noResults = css({ fontSize: '0.75rem', lineHeight: '1rem', color: 'var(--muted-foreground)', textAlign: 'center', padding: '0.5rem 0' })
+const resultsList = css({
+  maxHeight: '13rem',
+  overflowY: 'auto',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.25rem',
+})
+const noResults = css({
+  fontSize: '0.75rem',
+  lineHeight: '1rem',
+  color: 'var(--muted-foreground)',
+  textAlign: 'center',
+  padding: '0.5rem 0',
+})
 const resultButton = css({
   width: '100%',
   textAlign: 'left',
@@ -82,11 +105,12 @@ export function ProductSearch(handle: Handle<ProductSearchProps>) {
     try {
       let url = new URL(handle.props.productsUrl, location.href)
       url.searchParams.set('term', term)
-      let response = await fetch(url, { headers: { Accept: 'application/json' }, signal: current.signal })
+      let response = await fetch(url, {
+        headers: { Accept: 'application/json' },
+        signal: current.signal,
+      })
       let data = (await response.json().catch(() => null)) as
-        | { products: Product[]; hasLocation: boolean; error?: undefined }
-        | { error: string }
-        | null
+        { products: Product[]; hasLocation: boolean; error?: undefined } | { error: string } | null
       if (current.signal.aborted) return
       if (!response.ok || !data || 'error' in data) {
         results = []
@@ -186,7 +210,9 @@ export function ProductSearch(handle: Handle<ProductSearchProps>) {
             {results.length > 0 && (
               <>
                 {!hasLocation && (
-                  <p mix={textXsMuted}>Set a store location in Settings to see prices and enable linking.</p>
+                  <p mix={textXsMuted}>
+                    Set a store location in Settings to see prices and enable linking.
+                  </p>
                 )}
                 <ul mix={resultsList}>
                   {results.map((product) => (
@@ -194,7 +220,9 @@ export function ProductSearch(handle: Handle<ProductSearchProps>) {
                       <button
                         type="button"
                         disabled={!product.upc}
-                        title={product.upc ? undefined : 'No UPC — set a store location in Settings'}
+                        title={
+                          product.upc ? undefined : 'No UPC — set a store location in Settings'
+                        }
                         mix={[
                           resultButton,
                           on('click', () => {
@@ -207,12 +235,22 @@ export function ProductSearch(handle: Handle<ProductSearchProps>) {
                           <img
                             src={product.imageUrl}
                             alt=""
-                            mix={css({ width: '2.5rem', height: '2.5rem', objectFit: 'contain', flexShrink: 0, borderRadius: '0.25rem' })}
+                            mix={css({
+                              width: '2.5rem',
+                              height: '2.5rem',
+                              objectFit: 'contain',
+                              flexShrink: 0,
+                              borderRadius: '0.25rem',
+                            })}
                           />
                         )}
                         <span mix={css({ flex: 1, minWidth: 0 })}>
-                          <span mix={css({ display: 'block', fontWeight: 500, lineHeight: 1.25 })}>{product.description}</span>
-                          {product.price != null && <span mix={textXsMuted}>${product.price.toFixed(2)}</span>}
+                          <span mix={css({ display: 'block', fontWeight: 500, lineHeight: 1.25 })}>
+                            {product.description}
+                          </span>
+                          {product.price != null && (
+                            <span mix={textXsMuted}>${product.price.toFixed(2)}</span>
+                          )}
                         </span>
                       </button>
                     </li>

@@ -12,13 +12,22 @@ export async function createTestDatabase(): Promise<Database> {
 
 export const TEST_PASSWORD = 'correct horse'
 
-export async function createUser(db: Database, email = 'cook@example.com', password = TEST_PASSWORD) {
+export async function createUser(
+  db: Database,
+  email = 'cook@example.com',
+  password = TEST_PASSWORD,
+) {
   let result = await registerUser(db, email, password)
   if (!result.ok) throw new Error(result.error)
   return result.user
 }
 
-export async function createMealWith(db: Database, userId: number, name: string, items: string[] = []) {
+export async function createMealWith(
+  db: Database,
+  userId: number,
+  name: string,
+  items: string[] = [],
+) {
   let result = await createMeal(db, userId, name)
   if (!result.ok) throw new Error(result.error)
   for (let raw of items) {

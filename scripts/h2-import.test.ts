@@ -80,13 +80,20 @@ describe('importH2Export', () => {
     )
 
     let [order] = await listRecentOrders(db, 1)
-    assert.deepEqual(order, { id: 1, createdAt: '2026-10-04T20:01:41.046Z', mealNames: ['Tacos', 'Chili'] })
+    assert.deepEqual(order, {
+      id: 1,
+      createdAt: '2026-10-04T20:01:41.046Z',
+      mealNames: ['Tacos', 'Chili'],
+    })
 
     let config = await db.find(krogerConfigs, 1)
     assert.deepEqual([config?.client_id, config?.location_name], ['cid', 'Kroger Midtown'])
     assert.equal(await db.find(krogerTokens, { user_id: 1, grant_type: 'CLIENT' }), null)
     let token = await db.find(krogerTokens, { user_id: 1, grant_type: 'USER' })
-    assert.deepEqual([token?.refresh_token, token?.expires_at], ['user-refresh', '2026-10-04T21:00:00.000Z'])
+    assert.deepEqual(
+      [token?.refresh_token, token?.expires_at],
+      ['user-refresh', '2026-10-04T21:00:00.000Z'],
+    )
   })
 
   it('keeps new ids after the imported ones', async () => {

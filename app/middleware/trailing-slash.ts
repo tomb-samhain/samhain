@@ -5,8 +5,15 @@ import type { Middleware } from 'remix/router'
 export function stripTrailingSlash(): Middleware {
   return (context, next) => {
     let { pathname, search } = context.url
-    if (pathname.length > 1 && pathname.endsWith('/') && (context.method === 'GET' || context.method === 'HEAD')) {
-      return new Response(null, { status: 308, headers: { Location: pathname.replace(/\/+$/, '') + search } })
+    if (
+      pathname.length > 1 &&
+      pathname.endsWith('/') &&
+      (context.method === 'GET' || context.method === 'HEAD')
+    ) {
+      return new Response(null, {
+        status: 308,
+        headers: { Location: pathname.replace(/\/+$/, '') + search },
+      })
     }
     return next()
   }

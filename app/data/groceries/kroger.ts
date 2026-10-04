@@ -97,15 +97,25 @@ export class Kroger {
   async updateLocation(userId: number, locationId: string, locationName: string | null) {
     let config = await this.getConfig(userId)
     if (!config) throw new KrogerError('Kroger config not set')
-    await this.#db.update(krogerConfigs, userId, { location_id: locationId, location_name: locationName })
+    await this.#db.update(krogerConfigs, userId, {
+      location_id: locationId,
+      location_name: locationName,
+    })
   }
 
   async setCredentials(userId: number, clientId: string, clientSecret: string) {
     let existing = await this.getConfig(userId)
     if (existing) {
-      await this.#db.update(krogerConfigs, userId, { client_id: clientId, client_secret: clientSecret })
+      await this.#db.update(krogerConfigs, userId, {
+        client_id: clientId,
+        client_secret: clientSecret,
+      })
     } else {
-      await this.#db.create(krogerConfigs, { user_id: userId, client_id: clientId, client_secret: clientSecret })
+      await this.#db.create(krogerConfigs, {
+        user_id: userId,
+        client_id: clientId,
+        client_secret: clientSecret,
+      })
     }
   }
 
@@ -181,7 +191,8 @@ export class Kroger {
     if (!token) throw new KrogerError('Kroger account not connected. Go to Settings to connect.')
     if (this.#isFresh(token)) return token.access_token
 
-    if (!token.refresh_token) throw new KrogerError('User token expired and no refresh token available')
+    if (!token.refresh_token)
+      throw new KrogerError('User token expired and no refresh token available')
     let config = await this.getConfig(userId)
     if (!config) throw new KrogerError('Kroger not configured')
 
@@ -226,8 +237,12 @@ export class Kroger {
       handleCallback: async (context, transaction) => {
         let code = context.url.searchParams.get('code')
         if (!code) {
-          let reason = context.url.searchParams.get('error_description') ?? context.url.searchParams.get('error')
-          throw new KrogerError(reason ? `Kroger authorization failed: ${reason}` : 'Missing authorization code')
+          let reason =
+            context.url.searchParams.get('error_description') ??
+            context.url.searchParams.get('error')
+          throw new KrogerError(
+            reason ? `Kroger authorization failed: ${reason}` : 'Missing authorization code',
+          )
         }
         let tokens = await this.#requestToken(config, {
           grant_type: 'authorization_code',

@@ -34,7 +34,8 @@ export function requireGroceriesUser() {
         return Response.json({ error: 'Unauthorized' }, { status: 401 })
       }
       let login = new URL(routes.groceries.auth.login.href(), context.url)
-      if (context.method === 'GET') login.searchParams.set('returnTo', context.url.pathname + context.url.search)
+      if (context.method === 'GET')
+        login.searchParams.set('returnTo', context.url.pathname + context.url.search)
       return redirect(login.pathname + login.search, 303)
     },
   })

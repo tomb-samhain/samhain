@@ -2,7 +2,17 @@ import { css, on, ref } from 'remix/component'
 import type { Handle, RemixNode } from 'remix/component'
 
 import { Loader, X } from './icons.tsx'
-import { button, dialog, dialogClose, dialogFooter, dialogHeader, dialogTitle, input, textSmMuted, textDestructive } from './styles.ts'
+import {
+  button,
+  dialog,
+  dialogClose,
+  dialogFooter,
+  dialogHeader,
+  dialogTitle,
+  input,
+  textSmMuted,
+  textDestructive,
+} from './styles.ts'
 
 export interface DialogShellProps {
   // Unique on the page; triggers open it with commandfor/command="show-modal".
@@ -73,7 +83,18 @@ export interface NameFormProps {
 // Enter submits through the form, matching the source's onKeyDown handler.
 export function NameForm(handle: Handle<NameFormProps>) {
   return () => {
-    let { action, returnTo, name, placeholder, submitLabel, pending, error, onInput, onCancel, onSubmit } = handle.props
+    let {
+      action,
+      returnTo,
+      name,
+      placeholder,
+      submitLabel,
+      pending,
+      error,
+      onInput,
+      onCancel,
+      onSubmit,
+    } = handle.props
     return (
       <form
         method="post"

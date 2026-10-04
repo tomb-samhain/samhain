@@ -14,17 +14,42 @@ export function OrdersPage(handle: Handle<{ user: CurrentUser; orders: OrderSumm
     return (
       <GroceriesLayout user={user} active="orders" title="Orders · 5 Minute Groceries">
         {orders.length === 0 ? (
-          <div mix={css({ padding: '4rem 0', textAlign: 'center', color: 'var(--muted-foreground)', fontSize: '0.875rem', lineHeight: '1.25rem' })}>
+          <div
+            mix={css({
+              padding: '4rem 0',
+              textAlign: 'center',
+              color: 'var(--muted-foreground)',
+              fontSize: '0.875rem',
+              lineHeight: '1.25rem',
+            })}
+          >
             No orders yet. Head to the Shop page to add meals to your cart.
           </div>
         ) : (
-          <div mix={css({ maxWidth: '42rem', marginInline: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem' })}>
-            <h1 mix={css({ fontSize: '1.5rem', lineHeight: '2rem', fontWeight: 600 })}>Recent Orders</h1>
+          <div
+            mix={css({
+              maxWidth: '42rem',
+              marginInline: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+            })}
+          >
+            <h1 mix={css({ fontSize: '1.5rem', lineHeight: '2rem', fontWeight: 600 })}>
+              Recent Orders
+            </h1>
             <div mix={css({ display: 'flex', flexDirection: 'column', gap: '0.75rem' })}>
               {orders.map((order) => (
                 <div
                   key={order.id}
-                  mix={css({ borderWidth: '1px', borderRadius: 'var(--radius)', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' })}
+                  mix={css({
+                    borderWidth: '1px',
+                    borderRadius: 'var(--radius)',
+                    padding: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '0.25rem',
+                  })}
                 >
                   <p mix={textSmMuted}>
                     <LocalTime iso={order.createdAt} />
@@ -33,7 +58,9 @@ export function OrdersPage(handle: Handle<{ user: CurrentUser; orders: OrderSumm
                     {order.mealNames.length > 0 ? (
                       order.mealNames.join(', ')
                     ) : (
-                      <span mix={css({ color: 'var(--muted-foreground)', fontStyle: 'italic' })}>No meals recorded</span>
+                      <span mix={css({ color: 'var(--muted-foreground)', fontStyle: 'italic' })}>
+                        No meals recorded
+                      </span>
                     )}
                   </p>
                 </div>

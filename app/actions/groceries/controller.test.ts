@@ -38,7 +38,10 @@ describe('orders page', () => {
     let order = await createOrder(app.db, user.id, [])
     let html = await (await app.fetch(orders, { cookie })).text()
     assert.match(html, /No meals recorded/)
-    assert.match(html, new RegExp(`<time datetime="${order.createdAt}"[^>]*>${formatUtc(order.createdAt)}</time>`))
+    assert.match(
+      html,
+      new RegExp(`<time datetime="${order.createdAt}"[^>]*>${formatUtc(order.createdAt)}</time>`),
+    )
   })
 
   it("does not show another user's orders", async () => {
@@ -64,7 +67,10 @@ describe('groceries access control', () => {
       let app = await createTestApp()
       let response = await app.fetch(page)
       assert.equal(response.status, 303)
-      assert.equal(response.headers.get('Location'), `/groceries/login?returnTo=${encodeURIComponent(page)}`)
+      assert.equal(
+        response.headers.get('Location'),
+        `/groceries/login?returnTo=${encodeURIComponent(page)}`,
+      )
     })
   }
 
@@ -77,12 +83,17 @@ describe('groceries access control', () => {
       [routes.groceries.settings.index.href(), 'Settings'],
     ]) {
       let html = await (await app.fetch(page, { cookie })).text()
-      let current = [...html.matchAll(/<a href="[^"]+" aria-current="page"[^>]*>.*?<\/svg>([^<]+)<\/a>/g)].map((m) => m[1])
-      assert.ok(current.length > 0 && current.every((text) => text === label), `${page}: ${current}`)
+      let current = [
+        ...html.matchAll(/<a href="[^"]+" aria-current="page"[^>]*>.*?<\/svg>([^<]+)<\/a>/g),
+      ].map((m) => m[1])
+      assert.ok(
+        current.length > 0 && current.every((text) => text === label),
+        `${page}: ${current}`,
+      )
     }
   })
 
-  it('redirects the Spring app\'s trailing-slash URLs', async () => {
+  it("redirects the Spring app's trailing-slash URLs", async () => {
     let app = await createTestApp()
     for (let [from, to] of [
       ['/groceries/', '/groceries'],

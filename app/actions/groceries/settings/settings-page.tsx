@@ -54,7 +54,12 @@ export function SettingsPage(handle: Handle<SettingsPageProps>) {
 }
 
 function LocationCard(
-  handle: Handle<{ status: KrogerStatus; zip: string; locations: KrogerLocation[]; error?: string }>,
+  handle: Handle<{
+    status: KrogerStatus
+    zip: string
+    locations: KrogerLocation[]
+    error?: string
+  }>,
 ) {
   return () => {
     let { status, zip, locations, error } = handle.props
@@ -67,14 +72,26 @@ function LocationCard(
           </h3>
           <p mix={cardDescription}>Find and select your nearest Kroger store.</p>
           {status.locationName && (
-            <div mix={css({ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem', fontSize: '0.875rem' })}>
+            <div
+              mix={css({
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginTop: '0.25rem',
+                fontSize: '0.875rem',
+              })}
+            >
               <span mix={css({ color: 'var(--muted-foreground)' })}>Current:</span>
               <span mix={badge('outline')}>{status.locationName}</span>
             </div>
           )}
         </div>
         <div mix={cardContent}>
-          <form method="get" action={routes.groceries.settings.index.href()} mix={css({ display: 'flex', gap: '0.5rem' })}>
+          <form
+            method="get"
+            action={routes.groceries.settings.index.href()}
+            mix={css({ display: 'flex', gap: '0.5rem' })}
+          >
             <input
               name="zip"
               defaultValue={zip}
@@ -98,12 +115,24 @@ function LocationCard(
             <form
               method="post"
               action={routes.groceries.settings.location.href()}
-              mix={css({ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start' })}
+              mix={css({
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+                alignItems: 'flex-start',
+              })}
             >
               <input type="hidden" name="zip" value={zip} />
-              <div role="radiogroup" aria-label="Kroger stores" mix={css({ display: 'grid', gap: '0.25rem' })}>
+              <div
+                role="radiogroup"
+                aria-label="Kroger stores"
+                mix={css({ display: 'grid', gap: '0.25rem' })}
+              >
                 {locations.map((location) => (
-                  <div key={location.locationId} mix={css({ display: 'flex', alignItems: 'center', gap: '0.5rem' })}>
+                  <div
+                    key={location.locationId}
+                    mix={css({ display: 'flex', alignItems: 'center', gap: '0.5rem' })}
+                  >
                     <input
                       type="radio"
                       id={`loc-${location.locationId}`}
@@ -113,9 +142,14 @@ function LocationCard(
                       required
                       mix={radio}
                     />
-                    <label for={`loc-${location.locationId}`} mix={css({ cursor: 'pointer', fontSize: '0.875rem', lineHeight: 1 })}>
+                    <label
+                      for={`loc-${location.locationId}`}
+                      mix={css({ cursor: 'pointer', fontSize: '0.875rem', lineHeight: 1 })}
+                    >
                       <span mix={css({ fontWeight: 500 })}>{location.name}</span>
-                      <span mix={css({ color: 'var(--muted-foreground)', marginLeft: '0.5rem' })}>{location.address}</span>
+                      <span mix={css({ color: 'var(--muted-foreground)', marginLeft: '0.5rem' })}>
+                        {location.address}
+                      </span>
                     </label>
                   </div>
                 ))}
@@ -139,12 +173,16 @@ function AccountCard(handle: Handle<{ status: KrogerStatus; error?: string }>) {
           <h3 id="account-title" mix={cardTitle}>
             Kroger Account
           </h3>
-          <p mix={cardDescription}>Connect your Kroger account to enable adding items to your cart.</p>
+          <p mix={cardDescription}>
+            Connect your Kroger account to enable adding items to your cart.
+          </p>
         </div>
         <div mix={cardContent}>
           <div mix={css({ display: 'flex', alignItems: 'center', gap: '0.75rem' })}>
             <span mix={css({ fontSize: '0.875rem', fontWeight: 500 })}>Status:</span>
-            <span mix={badge(connected ? 'success' : 'secondary')}>{connected ? 'Connected' : 'Not connected'}</span>
+            <span mix={badge(connected ? 'success' : 'secondary')}>
+              {connected ? 'Connected' : 'Not connected'}
+            </span>
           </div>
           {error && (
             <p role="alert" mix={textDestructive}>
@@ -153,7 +191,12 @@ function AccountCard(handle: Handle<{ status: KrogerStatus; error?: string }>) {
           )}
           {/* A full document navigation: the response redirects to kroger.com. */}
           <form method="post" action={routes.groceries.kroger.connect.href()} data-rmx-document>
-            <PendingButton variant={connected ? 'outline' : 'default'} spinner icon="external-link" extra={{ gap: '1rem' }}>
+            <PendingButton
+              variant={connected ? 'outline' : 'default'}
+              spinner
+              icon="external-link"
+              extra={{ gap: '1rem' }}
+            >
               {connected ? 'Reconnect with Kroger' : 'Connect with Kroger'}
             </PendingButton>
           </form>

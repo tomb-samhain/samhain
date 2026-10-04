@@ -74,7 +74,8 @@ export function createAppRouter(options: AppRouterOptions) {
 function readSessionSecret() {
   let secret = process.env.SESSION_SECRET
   if (secret) return secret
-  if (process.env.NODE_ENV === 'production') throw new Error('SESSION_SECRET must be set in production')
+  if (process.env.NODE_ENV === 'production')
+    throw new Error('SESSION_SECRET must be set in production')
   return DEV_SESSION_SECRET
 }
 

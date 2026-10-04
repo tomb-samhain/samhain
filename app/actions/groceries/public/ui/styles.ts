@@ -31,7 +31,8 @@ function memo<args extends unknown[]>(build: (...args: args) => CSSProps) {
   }
 }
 
-export type ButtonVariant = 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'green'
+export type ButtonVariant =
+  'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' | 'green'
 export type ButtonSize = 'default' | 'sm' | 'lg' | 'icon'
 
 const buttonVariants: Record<ButtonVariant, CSSProps> = {
@@ -85,34 +86,49 @@ export interface ButtonOptions {
   extra?: CSSProps
 }
 
-export const button = memo(({ variant = 'default', size = 'default', extra }: ButtonOptions = {}) => ({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: '0.5rem',
-  whiteSpace: 'nowrap',
-  borderRadius: 'calc(var(--radius) - 2px)',
-  fontSize: '0.875rem',
-  lineHeight: '1.25rem',
-  fontWeight: 500,
-  transitionProperty: 'color, background-color, border-color, opacity',
-  transitionDuration: '150ms',
-  cursor: 'pointer',
-  textDecoration: 'none',
-  '&:focus-visible': focusRing,
-  '&:disabled': { pointerEvents: 'none', opacity: 0.5 },
-  '& svg': { width: '1rem', height: '1rem', pointerEvents: 'none', flexShrink: 0 },
-  ...buttonVariants[variant],
-  ...buttonSizes[size],
-  ...extra,
-}))
+export const button = memo(
+  ({ variant = 'default', size = 'default', extra }: ButtonOptions = {}) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    whiteSpace: 'nowrap',
+    borderRadius: 'calc(var(--radius) - 2px)',
+    fontSize: '0.875rem',
+    lineHeight: '1.25rem',
+    fontWeight: 500,
+    transitionProperty: 'color, background-color, border-color, opacity',
+    transitionDuration: '150ms',
+    cursor: 'pointer',
+    textDecoration: 'none',
+    '&:focus-visible': focusRing,
+    '&:disabled': { pointerEvents: 'none', opacity: 0.5 },
+    '& svg': { width: '1rem', height: '1rem', pointerEvents: 'none', flexShrink: 0 },
+    ...buttonVariants[variant],
+    ...buttonSizes[size],
+    ...extra,
+  }),
+)
 
-export type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'
+export type BadgeVariant =
+  'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'
 
 const badgeVariants: Record<BadgeVariant, CSSProps> = {
-  default: { borderColor: 'transparent', background: 'var(--primary)', color: 'var(--primary-foreground)' },
-  secondary: { borderColor: 'transparent', background: 'var(--secondary)', color: 'var(--secondary-foreground)' },
-  destructive: { borderColor: 'transparent', background: 'var(--destructive)', color: 'var(--destructive-foreground)' },
+  default: {
+    borderColor: 'transparent',
+    background: 'var(--primary)',
+    color: 'var(--primary-foreground)',
+  },
+  secondary: {
+    borderColor: 'transparent',
+    background: 'var(--secondary)',
+    color: 'var(--secondary-foreground)',
+  },
+  destructive: {
+    borderColor: 'transparent',
+    background: 'var(--destructive)',
+    color: 'var(--destructive-foreground)',
+  },
   outline: { color: 'var(--foreground)' },
   success: { borderColor: 'transparent', background: 'var(--green-500)', color: 'white' },
   warning: { borderColor: 'transparent', background: 'var(--yellow-500)', color: 'white' },
@@ -156,14 +172,23 @@ export const card = css({
   color: 'var(--card-foreground)',
   boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
 })
-export const cardHeader = css({ display: 'flex', flexDirection: 'column', gap: '0.375rem', padding: '1.5rem' })
+export const cardHeader = css({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.375rem',
+  padding: '1.5rem',
+})
 export const cardTitle = css({
   fontSize: '1.5rem',
   lineHeight: 1,
   fontWeight: 600,
   letterSpacing: '-0.025em',
 })
-export const cardDescription = css({ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'var(--muted-foreground)' })
+export const cardDescription = css({
+  fontSize: '0.875rem',
+  lineHeight: '1.25rem',
+  color: 'var(--muted-foreground)',
+})
 export const cardContent = css({
   padding: '0 1.5rem 1.5rem',
   display: 'flex',
@@ -196,15 +221,36 @@ export const alert = memo((variant: 'default' | 'destructive' | 'success' = 'def
 }))
 export const alertDescription = css({ fontSize: '0.875rem', lineHeight: '1.25rem' })
 
-export const separator = css({ flexShrink: 0, height: '1px', width: '100%', background: 'var(--border)' })
+export const separator = css({
+  flexShrink: 0,
+  height: '1px',
+  width: '100%',
+  background: 'var(--border)',
+})
 
 export const label = css({ fontSize: '0.875rem', lineHeight: 1, fontWeight: 500 })
 
 export const textMuted = css({ color: 'var(--muted-foreground)' })
-export const textSmMuted = css({ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'var(--muted-foreground)' })
-export const textXsMuted = css({ fontSize: '0.75rem', lineHeight: '1rem', color: 'var(--muted-foreground)' })
-export const textDestructive = css({ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'var(--destructive)' })
-export const textXsDestructive = css({ fontSize: '0.75rem', lineHeight: '1rem', color: 'var(--destructive)' })
+export const textSmMuted = css({
+  fontSize: '0.875rem',
+  lineHeight: '1.25rem',
+  color: 'var(--muted-foreground)',
+})
+export const textXsMuted = css({
+  fontSize: '0.75rem',
+  lineHeight: '1rem',
+  color: 'var(--muted-foreground)',
+})
+export const textDestructive = css({
+  fontSize: '0.875rem',
+  lineHeight: '1.25rem',
+  color: 'var(--destructive)',
+})
+export const textXsDestructive = css({
+  fontSize: '0.75rem',
+  lineHeight: '1rem',
+  color: 'var(--destructive)',
+})
 export const pageTitle = css({ fontSize: '1.5rem', lineHeight: '2rem', fontWeight: 700 })
 export const sectionLabel = css({
   fontSize: '0.875rem',
@@ -257,7 +303,12 @@ export const dialogHeader = css({
   textAlign: 'center',
   [sm]: { textAlign: 'left' },
 })
-export const dialogTitle = css({ fontSize: '1.125rem', lineHeight: 1, fontWeight: 600, letterSpacing: '-0.025em' })
+export const dialogTitle = css({
+  fontSize: '1.125rem',
+  lineHeight: 1,
+  fontWeight: 600,
+  letterSpacing: '-0.025em',
+})
 export const dialogFooter = css({
   display: 'flex',
   flexDirection: 'column-reverse',
@@ -314,7 +365,11 @@ export const menuItem = memo((destructive: boolean) => ({
   },
   '& svg': { marginRight: '0.5rem' },
 }))
-export const menuSeparator = css({ margin: '0.25rem -0.25rem', height: '1px', background: 'var(--muted)' })
+export const menuSeparator = css({
+  margin: '0.25rem -0.25rem',
+  height: '1px',
+  background: 'var(--muted)',
+})
 
 const checkSvg = encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='hsl(210 40% 98%)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M20 6 9 17l-5-5'/></svg>",
@@ -344,7 +399,9 @@ export const radio = css({
   border: '1px solid var(--primary)',
   cursor: 'pointer',
   '&:focus-visible': focusRing,
-  '&:checked': { background: 'radial-gradient(circle, var(--primary) 0 0.3125rem, transparent 0.34rem)' },
+  '&:checked': {
+    background: 'radial-gradient(circle, var(--primary) 0 0.3125rem, transparent 0.34rem)',
+  },
 })
 
 export const skeleton = memo((extra?: CSSProps) => ({

@@ -2,7 +2,11 @@ import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
 
 import { KrogerError } from '../../../data/groceries/kroger.ts'
-import { consolidateMeals, linkProductAcrossMeals, listMeals } from '../../../data/groceries/meals.ts'
+import {
+  consolidateMeals,
+  linkProductAcrossMeals,
+  listMeals,
+} from '../../../data/groceries/meals.ts'
 import { createOrder } from '../../../data/groceries/orders.ts'
 import { requireGroceriesUser } from '../../../middleware/groceries-auth.ts'
 import { routes } from '../../../routes.ts'
@@ -25,7 +29,9 @@ export default createController(routes.groceries.shop, {
       let meals = await listMeals(context.db, user.id)
       // Unknown ids in the URL are dropped rather than failing the page.
       let owned = new Set(meals.map((meal) => meal.id))
-      let selectedIds = formIds(context.url.searchParams.getAll('meal')).filter((id) => owned.has(id))
+      let selectedIds = formIds(context.url.searchParams.getAll('meal')).filter((id) =>
+        owned.has(id),
+      )
       let items = (await consolidateMeals(context.db, user.id, selectedIds)) ?? []
 
       return context.render(
@@ -50,7 +56,10 @@ export default createController(routes.groceries.shop, {
       let productName = formText(context.formData, 'productName').trim()
       if (!name.trim() || !productId || !productName) return failJson('Choose a product to link.')
 
-      let linked = await linkProductAcrossMeals(context.db, user.id, mealIds, name, { productId, productName })
+      let linked = await linkProductAcrossMeals(context.db, user.id, mealIds, name, {
+        productId,
+        productName,
+      })
       if (!linked) return new Response('Meal not found', { status: 404 })
       return done(context.request, shopHref(mealIds))
     },
@@ -64,7 +73,10 @@ export default createController(routes.groceries.shop, {
 
       let reply = (body: { message: string } | { error: string }, status = 200) => {
         if (wantsJson(context.request)) return Response.json(body, { status })
-        context.session.flash('message' in body ? CART_RESULT_FLASH : CART_ERROR_FLASH, 'message' in body ? body.message : body.error)
+        context.session.flash(
+          'message' in body ? CART_RESULT_FLASH : CART_ERROR_FLASH,
+          'message' in body ? body.message : body.error,
+        )
         return redirect(back, 303)
       }
 
@@ -73,7 +85,8 @@ export default createController(routes.groceries.shop, {
       let cartItems = items
         .filter((item) => !excluded.has(item.name) && item.krogerProductId)
         .map((item) => ({ upc: item.krogerProductId!, quantity: 1 }))
-      if (cartItems.length === 0) return reply({ error: 'No Kroger products linked to ingredients' }, 400)
+      if (cartItems.length === 0)
+        return reply({ error: 'No Kroger products linked to ingredients' }, 400)
 
       let message: string
       try {

@@ -24,7 +24,10 @@ describe('groceries sign in page', () => {
     assert.match(html, /<label for="username"[^>]*>Email<\/label>/)
     assert.match(html, /<label for="password"[^>]*>Password<\/label>/)
     assert.match(html, />Sign In<\/button>/)
-    assert.match(html, /No account\? <a href="\/groceries\/login\?mode=register"[^>]*>Register<\/a>/)
+    assert.match(
+      html,
+      /No account\? <a href="\/groceries\/login\?mode=register"[^>]*>Register<\/a>/,
+    )
     assert.match(html, new RegExp(`<form method="post" action="${loginAction}"`))
   })
 
@@ -33,7 +36,10 @@ describe('groceries sign in page', () => {
     let html = await (await app.fetch(`${login}?mode=register`)).text()
     assert.match(html, /Create a new account/)
     assert.match(html, />Register<\/button>/)
-    assert.match(html, /Already have an account\? <a href="\/groceries\/login\?mode=signin"[^>]*>Sign In<\/a>/)
+    assert.match(
+      html,
+      /Already have an account\? <a href="\/groceries\/login\?mode=signin"[^>]*>Sign In<\/a>/,
+    )
     assert.match(html, new RegExp(`action="${register}"`))
   })
 
@@ -57,7 +63,10 @@ describe('groceries sign in', () => {
   it('signs in and redirects to the meals page', async () => {
     let app = await createTestApp()
     await createUser(app.db)
-    let response = await app.post(loginAction, { email: 'COOK@example.com', password: TEST_PASSWORD })
+    let response = await app.post(loginAction, {
+      email: 'COOK@example.com',
+      password: TEST_PASSWORD,
+    })
 
     assert.equal(response.status, 303)
     assert.equal(response.headers.get('Location'), meals)
@@ -70,7 +79,10 @@ describe('groceries sign in', () => {
   it('sets an httpOnly, SameSite=Lax session cookie', async () => {
     let app = await createTestApp()
     await createUser(app.db)
-    let response = await app.post(loginAction, { email: 'cook@example.com', password: TEST_PASSWORD })
+    let response = await app.post(loginAction, {
+      email: 'cook@example.com',
+      password: TEST_PASSWORD,
+    })
     let setCookie = response.headers.getSetCookie().join('\n')
     assert.match(setCookie, /HttpOnly/i)
     assert.match(setCookie, /SameSite=Lax/i)
@@ -87,7 +99,12 @@ describe('groceries sign in', () => {
     assert.match(html, /role="alert"[^>]*>Invalid credentials</)
     assert.match(html, /value="cook@example\.com"/)
     assert.doesNotMatch(html, /value="nope"/)
-    assert.equal(response.headers.getSetCookie().some((c) => c.startsWith('groceries_session=') && !/Max-Age=0/.test(c)), false)
+    assert.equal(
+      response.headers
+        .getSetCookie()
+        .some((c) => c.startsWith('groceries_session=') && !/Max-Age=0/.test(c)),
+      false,
+    )
   })
 
   it('rejects an unknown email the same way', async () => {
@@ -100,10 +117,18 @@ describe('groceries sign in', () => {
   it('honors a local returnTo and ignores other origins', async () => {
     let app = await createTestApp()
     await createUser(app.db)
-    let local = await app.post(loginAction, { email: 'cook@example.com', password: TEST_PASSWORD, returnTo: '/groceries/shop?meal=1' })
+    let local = await app.post(loginAction, {
+      email: 'cook@example.com',
+      password: TEST_PASSWORD,
+      returnTo: '/groceries/shop?meal=1',
+    })
     assert.equal(local.headers.get('Location'), '/groceries/shop?meal=1')
 
-    let offsite = await app.post(loginAction, { email: 'cook@example.com', password: TEST_PASSWORD, returnTo: '//evil.example/' })
+    let offsite = await app.post(loginAction, {
+      email: 'cook@example.com',
+      password: TEST_PASSWORD,
+      returnTo: '//evil.example/',
+    })
     assert.equal(offsite.headers.get('Location'), meals)
   })
 
