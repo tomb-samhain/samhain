@@ -82,6 +82,18 @@ describe('groceries access control', () => {
     }
   })
 
+  it('redirects the Spring app\'s trailing-slash URLs', async () => {
+    let app = await createTestApp()
+    for (let [from, to] of [
+      ['/groceries/', '/groceries'],
+      ['/groceries/settings/?auth=success', '/groceries/settings?auth=success'],
+    ]) {
+      let response = await app.fetch(from)
+      assert.equal(response.status, 308)
+      assert.equal(response.headers.get('Location'), to)
+    }
+  })
+
   it('does not apply the October Rust theme to groceries pages', async () => {
     let app = await createTestApp()
     let html = await (await app.fetch(routes.groceries.auth.login.href())).text()

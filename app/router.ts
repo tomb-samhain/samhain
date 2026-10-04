@@ -20,6 +20,7 @@ import { assets } from './assets.ts'
 import { loadDatabase } from './middleware/database.ts'
 import { groceriesSessionAuth } from './middleware/groceries-auth.ts'
 import { loadKroger, type KrogerSettings } from './middleware/kroger.ts'
+import { stripTrailingSlash } from './middleware/trailing-slash.ts'
 import { routes } from './routes.ts'
 
 export interface AppRouterOptions {
@@ -44,6 +45,7 @@ export function createAppRouter(options: AppRouterOptions) {
   let router = createRouter({
     middleware: [
       staticFiles('./public', { index: false }),
+      stripTrailingSlash(),
       cop(),
       loadDatabase(db),
       session(sessionCookie, createCookieSessionStorage()),
