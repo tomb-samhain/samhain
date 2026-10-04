@@ -1,12 +1,20 @@
-import { completeAuth } from 'remix/auth'
 import { redirect } from 'remix/response/redirect'
 import { createController } from 'remix/router'
+import type { Session } from 'remix/session'
 
 import { authenticateUser, registerUser } from '../../../data/groceries/users.ts'
 import { AUTH_SESSION_KEY, safeReturnTo } from '../../../middleware/groceries-auth.ts'
 import { routes } from '../../../routes.ts'
 import { formText } from '../form.ts'
 import { LoginPage, type LoginMode } from './login-page.tsx'
+
+// Rotates the session id on sign in. Sessions live entirely in the signed cookie, so the
+// old id disappears with the old cookie; remix/auth's completeAuth() would also try to
+// delete it from storage and log a warning on every sign in.
+function startSession(session: Session, userId: number) {
+  session.regenerateId()
+  session.set(AUTH_SESSION_KEY, { userId })
+}
 
 export default createController(routes.groceries.auth, {
   actions: {
@@ -31,7 +39,7 @@ export default createController(routes.groceries.auth, {
           )
         }
 
-        completeAuth(context).set(AUTH_SESSION_KEY, { userId: user.id })
+        startSession(context.session, user.id)
         return redirect(returnTo ?? routes.groceries.meals.index.href(), 303)
     },
 
@@ -50,7 +58,7 @@ export default createController(routes.groceries.auth, {
         )
       }
 
-      completeAuth(context).set(AUTH_SESSION_KEY, { userId: result.user.id })
+      startSession(context.session, result.user.id)
       return redirect(returnTo ?? routes.groceries.meals.index.href(), 303)
     },
 

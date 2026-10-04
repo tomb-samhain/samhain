@@ -1,6 +1,7 @@
 import * as assert from 'remix/assert'
 import type { Database } from 'remix/data-table'
 
+import { krogerConfigs, krogerTokens } from '../app/data/groceries/tables.ts'
 import { createAppRouter } from '../app/router.ts'
 import { routes } from '../app/routes.ts'
 import { createTestDatabase, createUser, TEST_PASSWORD } from './db.ts'
@@ -62,4 +63,16 @@ export async function signIn(app: TestApp, email = 'cook@example.com') {
   let response = await app.post(routes.groceries.auth.loginAction.href(), { email, password: TEST_PASSWORD })
   assert.equal(response.status, 303)
   return { user, cookie: getResponseCookie(response) }
+}
+
+// Stores a fresh Kroger user token (as if the OAuth flow completed) plus credentials.
+export async function connectKroger(app: TestApp, userId: number) {
+  await app.db.create(krogerConfigs, { user_id: userId, client_id: 'cid', client_secret: 'csec' }).catch(() => {})
+  await app.db.create(krogerTokens, {
+    user_id: userId,
+    grant_type: 'USER',
+    access_token: 'user-token',
+    refresh_token: 'refresh-token',
+    expires_at: new Date(Date.now() + 30 * 60_000).toISOString(),
+  })
 }
