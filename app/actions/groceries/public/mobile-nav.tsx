@@ -67,11 +67,19 @@ export const MobileNav = clientEntry(import.meta.url, function MobileNav(handle:
         <button
           type="button"
           aria-label="Open menu"
-          mix={[triggerStyle, on('click', () => dialog?.showModal())]}
+          commandfor="mobile-nav"
+          command="show-modal"
+          mix={[
+            triggerStyle,
+            on('click', () => {
+              if (dialog && !dialog.open) dialog.showModal()
+            }),
+          ]}
         >
           <Menu size={20} />
         </button>
         <dialog
+          id="mobile-nav"
           aria-labelledby="mobile-nav-title"
           mix={[
             sheetStyle,

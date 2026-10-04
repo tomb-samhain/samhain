@@ -221,8 +221,9 @@ export const IngredientRow = clientEntry(import.meta.url, function IngredientRow
         <Trash />
       </button>
     )
-    let search = (trigger: typeof iconSm, content: 'icon' | 'label', title?: string) => (
+    let search = (slot: string, trigger: typeof iconSm, content: 'icon' | 'label', title?: string) => (
       <ProductSearch
+        id={`product-search-${ingredient.id}-${slot}`}
         productsUrl={productsUrl}
         initialQuery={ingredient.name}
         trigger={trigger}
@@ -252,19 +253,19 @@ export const IngredientRow = clientEntry(import.meta.url, function IngredientRow
               <span mix={productNameDesktop}>{ingredient.productName}</span>
               <div data-reveal mix={desktopGroup}>
                 {editButton(iconSm)}
-                {search(iconSm, 'icon', 'Change product')}
+                {search('desktop', iconSm, 'icon', 'Change product')}
                 {deleteButton(iconSm)}
               </div>
               <div mix={mobileGroup}>
                 {editButton(iconMd)}
-                {search(iconMd, 'icon', 'Change product')}
+                {search('mobile', iconMd, 'icon', 'Change product')}
                 {deleteButton(iconMd)}
               </div>
             </>
           ) : (
             <>
               <div mix={desktopGroup}>
-                {search(linkButton, 'label')}
+                {search('desktop', linkButton, 'label')}
                 <div data-reveal mix={css({ display: 'flex', alignItems: 'center', gap: '0.25rem' })}>
                   {editButton(iconSm)}
                   {deleteButton(iconSm)}
@@ -285,7 +286,7 @@ export const IngredientRow = clientEntry(import.meta.url, function IngredientRow
             </span>
           </div>
         ) : (
-          <div mix={mobileSecondLineButton}>{search({ ...linkButton, extra: { ...linkButton.extra, flexShrink: 1 } }, 'label')}</div>
+          <div mix={mobileSecondLineButton}>{search('mobile', { ...linkButton, extra: { ...linkButton.extra, flexShrink: 1 } }, 'label')}</div>
         )}
 
         {error && (

@@ -139,8 +139,9 @@ export const ConsolidatedList = clientEntry(import.meta.url, function Consolidat
     let linkedCount = active.filter((item) => item.krogerProductId).length
     let unlinkedCount = active.length - linkedCount
 
-    let search = (item: ConsolidatedItem, trigger: ButtonOptions, label: string | null, title?: string) => (
+    let search = (item: ConsolidatedItem, slot: string, trigger: ButtonOptions, label: string | null, title?: string) => (
       <ProductSearch
+        id={`consolidated-search-${items.indexOf(item)}-${slot}`}
         productsUrl={productsUrl}
         initialQuery={item.name}
         trigger={trigger}
@@ -198,10 +199,10 @@ export const ConsolidatedList = clientEntry(import.meta.url, function Consolidat
                     {item.krogerProductName ? (
                       <div mix={css({ display: 'flex', alignItems: 'center', gap: '0.5rem' })}>
                         <span mix={productLine}>{item.krogerProductName}</span>
-                        {search(item, changeMobile, null, 'Change product')}
+                        {search(item, 'mobile', changeMobile, null, 'Change product')}
                       </div>
                     ) : (
-                      search(item, linkButtonFull, 'Link Kroger product')
+                      search(item, 'mobile', linkButtonFull, 'Link Kroger product')
                     )}
                   </div>
                 </div>
@@ -245,10 +246,10 @@ export const ConsolidatedList = clientEntry(import.meta.url, function Consolidat
                           {item.krogerProductName ? (
                             <div mix={css({ display: 'flex', alignItems: 'center', gap: '0.5rem' })}>
                               <span mix={textSm}>{item.krogerProductName}</span>
-                              <span data-reveal>{search(item, smallIcon, null, 'Change product')}</span>
+                              <span data-reveal>{search(item, 'desktop', smallIcon, null, 'Change product')}</span>
                             </div>
                           ) : (
-                            search(item, linkButton, 'Link product')
+                            search(item, 'desktop', linkButton, 'Link product')
                           )}
                         </td>
                         <td mix={table.cell}>{removeFromCart(item, true)}</td>

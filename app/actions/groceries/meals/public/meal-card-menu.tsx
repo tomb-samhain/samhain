@@ -2,12 +2,14 @@ import { clientEntry, css, on, ref } from 'remix/component'
 import type { Handle } from 'remix/component'
 
 import { post, submitForm } from '../../public/submit.ts'
-import { DialogShell, NameForm } from '../../public/ui/dialog.tsx'
+import { DialogShell, NameForm, openDialog } from '../../public/ui/dialog.tsx'
 import { Loader, MoreVertical, Pencil, Trash } from '../../public/ui/icons.tsx'
 import { placePopover } from '../../public/ui/overlays.ts'
 import { alpha, button, dialogFooter, menuItem, menuSeparator, popoverContent, textDestructive } from '../../public/ui/styles.ts'
 
 export interface MealCardMenuProps {
+  // Unique on the page; the kebab opens the menu with `popovertarget` before hydration.
+  menuId: string
   mealName: string
   selected: boolean
   renameAction: string
@@ -38,7 +40,7 @@ export const MealCardMenu = clientEntry(import.meta.url, function MealCardMenu(h
   let menu: HTMLElement | undefined
   let renameDialog: HTMLDialogElement | undefined
   let deleteDialog: HTMLDialogElement | undefined
-  let name = ''
+  let name = handle.props.mealName
   let pending = false
   let renameError: string | null = null
   let deleteError: string | null = null
@@ -48,14 +50,14 @@ export const MealCardMenu = clientEntry(import.meta.url, function MealCardMenu(h
     name = handle.props.mealName
     renameError = null
     handle.update()
-    renameDialog?.showModal()
+    openDialog(renameDialog)
   }
 
   function openDelete() {
     menu?.hidePopover()
     deleteError = null
     handle.update()
-    deleteDialog?.showModal()
+    openDialog(deleteDialog)
   }
 
   async function rename(form: HTMLFormElement, signal: AbortSignal) {
@@ -85,51 +87,66 @@ export const MealCardMenu = clientEntry(import.meta.url, function MealCardMenu(h
   }
 
   return () => {
-    let { mealName, selected, renameAction, deleteAction, returnTo } = handle.props
+    let { menuId, mealName, selected, renameAction, deleteAction, returnTo } = handle.props
     return (
       <>
         <button
           type="button"
           aria-label={`Options for ${mealName}`}
           aria-haspopup="menu"
-          mix={[
-            selected ? selectedTriggerStyle : triggerStyle,
-            ref((node) => (trigger = node as HTMLButtonElement)),
-            on('click', (event) => {
-              event.preventDefault()
-              event.stopPropagation()
-              menu?.togglePopover()
-            }),
-          ]}
+          popovertarget={menuId}
+          mix={[selected ? selectedTriggerStyle : triggerStyle, ref((node) => (trigger = node as HTMLButtonElement))]}
         >
           <MoreVertical />
         </button>
         <div
+          id={menuId}
           popover="auto"
           role="menu"
           mix={[
             menuStyle,
             ref((node) => (menu = node as HTMLElement)),
-            on('toggle', (event) => {
-              if ((event as ToggleEvent).newState === 'open' && trigger && menu) placePopover(menu, trigger, 'end')
+            ref((node, signal) => {
+              let place = () => {
+                if (trigger && node.matches(':popover-open')) placePopover(node as HTMLElement, trigger, 'end')
+              }
+              node.addEventListener('toggle', place, { signal })
+              place()
             }),
           ]}
         >
-          <button type="button" role="menuitem" mix={[menuItem(false), on('click', openRename)]}>
+          <button
+            type="button"
+            role="menuitem"
+            commandfor={`${menuId}-rename`}
+            command="show-modal"
+            mix={[menuItem(false), on('click', openRename)]}
+          >
             <Pencil />
             Rename
           </button>
           <div role="separator" mix={menuSeparator} />
-          <button type="button" role="menuitem" mix={[menuItem(true), on('click', openDelete)]}>
+          <button
+            type="button"
+            role="menuitem"
+            commandfor={`${menuId}-delete`}
+            command="show-modal"
+            mix={[menuItem(true), on('click', openDelete)]}
+          >
             <Trash />
             Delete
           </button>
         </div>
 
         <DialogShell
+          id={`${menuId}-rename`}
           title="Rename meal"
           description={`Enter a new name for "${mealName}".`}
           bind={(node) => (renameDialog = node)}
+          onClose={() => {
+            name = handle.props.mealName
+            handle.update()
+          }}
         >
           <NameForm
             action={renameAction}
@@ -148,6 +165,7 @@ export const MealCardMenu = clientEntry(import.meta.url, function MealCardMenu(h
         </DialogShell>
 
         <DialogShell
+          id={`${menuId}-delete`}
           title="Delete meal"
           description={`Are you sure you want to delete "${mealName}"? This cannot be undone.`}
           bind={(node) => (deleteDialog = node)}

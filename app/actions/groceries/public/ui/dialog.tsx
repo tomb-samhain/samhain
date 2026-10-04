@@ -5,6 +5,8 @@ import { Loader, X } from './icons.tsx'
 import { button, dialog, dialogClose, dialogFooter, dialogHeader, dialogTitle, input, textSmMuted, textDestructive } from './styles.ts'
 
 export interface DialogShellProps {
+  // Unique on the page; triggers open it with commandfor/command="show-modal".
+  id: string
   title: string
   description: RemixNode
   children?: RemixNode
@@ -12,17 +14,15 @@ export interface DialogShellProps {
   onClose?(): void
 }
 
-let nextId = 0
-
 // shadcn's DialogContent on a native modal <dialog>: header, body, close button.
 export function DialogShell(handle: Handle<DialogShellProps>) {
-  let id = `dialog-${++nextId}`
   let node: HTMLDialogElement | undefined
 
   return () => {
-    let { title, description, children, bind, onClose } = handle.props
+    let { id, title, description, children, bind, onClose } = handle.props
     return (
       <dialog
+        id={id}
         aria-labelledby={`${id}-title`}
         aria-describedby={`${id}-description`}
         mix={[
@@ -113,4 +113,8 @@ export function NameForm(handle: Handle<NameFormProps>) {
       </form>
     )
   }
+}
+
+export function openDialog(dialog: HTMLDialogElement | undefined) {
+  if (dialog && !dialog.open) dialog.showModal()
 }

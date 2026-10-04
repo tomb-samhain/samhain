@@ -152,6 +152,7 @@ export function MealsPage(handle: Handle<MealsPageProps>) {
                         <p mix={isSelected ? mealCountSelected : mealCount}>{pluralize(meal.ingredientCount, 'ingredient')}</p>
                       </a>
                       <MealCardMenu
+                        menuId={`meal-menu-${meal.id}`}
                         mealName={meal.name}
                         selected={isSelected}
                         renameAction={routes.groceries.meals.rename.href({ mealId: meal.id })}

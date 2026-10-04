@@ -2,7 +2,7 @@ import { clientEntry, on } from 'remix/component'
 import type { Handle } from 'remix/component'
 
 import { submitForm } from '../../public/submit.ts'
-import { DialogShell, NameForm } from '../../public/ui/dialog.tsx'
+import { DialogShell, NameForm, openDialog } from '../../public/ui/dialog.tsx'
 import { PlusCircle } from '../../public/ui/icons.tsx'
 import { button } from '../../public/ui/styles.ts'
 
@@ -31,11 +31,17 @@ export const NewMealButton = clientEntry(import.meta.url, function NewMealButton
 
   return () => (
     <>
-      <button type="button" mix={[newButton, on('click', () => dialog?.showModal())]}>
+      <button
+        type="button"
+        commandfor="new-meal-dialog"
+        command="show-modal"
+        mix={[newButton, on('click', () => openDialog(dialog))]}
+      >
         <PlusCircle />
         New
       </button>
       <DialogShell
+        id="new-meal-dialog"
         title="New meal"
         description="Enter a name for your new meal."
         bind={(node) => (dialog = node)}

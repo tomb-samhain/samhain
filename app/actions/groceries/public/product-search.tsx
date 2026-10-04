@@ -14,6 +14,9 @@ export interface Product {
 }
 
 export interface ProductSearchProps {
+  // Unique on the page and identical on server and client: the trigger opens the popover
+  // with `popovertarget`, which works before this component hydrates.
+  id: string
   productsUrl: string
   initialQuery: string
   trigger: ButtonOptions
@@ -103,7 +106,10 @@ export function ProductSearch(handle: Handle<ProductSearchProps>) {
   }
 
   function onToggle(event: Event) {
-    let open = (event as ToggleEvent).newState === 'open'
+    setOpen((event as ToggleEvent).newState === 'open')
+  }
+
+  function setOpen(open: boolean) {
     query = handle.props.initialQuery
     if (open) {
       if (trigger && popover) placePopover(popover, trigger, 'start')
@@ -119,24 +125,20 @@ export function ProductSearch(handle: Handle<ProductSearchProps>) {
   }
 
   return () => {
-    let { trigger: triggerOptions, triggerContent, triggerTitle, onSelect } = handle.props
+    let { id, trigger: triggerOptions, triggerContent, triggerTitle, onSelect } = handle.props
     return (
       <>
         <button
           type="button"
           title={triggerTitle}
           aria-haspopup="dialog"
-          mix={[
-            button(triggerOptions),
-            ref((node) => (trigger = node as HTMLButtonElement)),
-            on('click', () => {
-              popover?.togglePopover()
-            }),
-          ]}
+          popovertarget={id}
+          mix={[button(triggerOptions), ref((node) => (trigger = node as HTMLButtonElement))]}
         >
           {triggerContent}
         </button>
         <div
+          id={id}
           popover="auto"
           role="dialog"
           aria-label="Search Kroger products"
@@ -145,6 +147,8 @@ export function ProductSearch(handle: Handle<ProductSearchProps>) {
             ref((node, signal) => {
               popover = node as HTMLElement
               popover.addEventListener('toggle', onToggle, { signal })
+              // Opened before hydration: search now.
+              if (popover.matches(':popover-open')) setOpen(true)
             }),
           ]}
         >
