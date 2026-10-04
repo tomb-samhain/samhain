@@ -30,4 +30,8 @@ Refer to ./.agents/skills/remix/SKILL.md for the Remix mental model and how to f
 - `app/assets.ts` owns the server-side asset pipeline used by the asset route and render middleware
 - Root `public/` contains static files served unchanged from the app root
 
+## Groceries Migration
+
+The 5 Minute Groceries app (`../groceries`, Spring + React) is being ported here under `/groceries`. Follow `docs/groceries-migration/MIGRATION.md` (plan, behavior spec, testing strategy, checklists) and compare against the screenshots in `docs/groceries-migration/reference/`. The Koog AI meal planner is out of scope.
+
 This starter intentionally begins small; add directories like `app/data/`, `app/middleware/`, `app/ui/`, and `test/` only when you need them.
