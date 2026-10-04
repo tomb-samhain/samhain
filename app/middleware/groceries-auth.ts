@@ -1,4 +1,4 @@
-import { createSessionAuthScheme, requireAuth } from 'remix/middleware/auth'
+import { createSessionAuthScheme, requireAuth, type AuthState } from 'remix/middleware/auth'
 import { redirect } from 'remix/response/redirect'
 
 import { getUser, type CurrentUser } from '../data/groceries/users.ts'
@@ -53,4 +53,10 @@ export function requireGroceriesUserJson() {
 export function safeReturnTo(value: FormDataEntryValue | string | null | undefined): string | null {
   if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) return null
   return value
+}
+
+// For actions whose requireGroceriesUser() middleware TypeScript cannot see.
+export function currentUser(context: { auth: AuthState<CurrentUser> }): CurrentUser {
+  if (!context.auth.ok) throw new Error('requireGroceriesUser() must run before this action')
+  return context.auth.identity
 }

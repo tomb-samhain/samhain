@@ -151,7 +151,6 @@ export function ProductSearch(handle: Handle<ProductSearchProps>) {
           <div mix={css({ display: 'flex', flexDirection: 'column', gap: '0.5rem' })}>
             <div mix={css({ display: 'flex', gap: '0.5rem' })}>
               <input
-                type="search"
                 placeholder="Search Kroger products..."
                 aria-label="Search Kroger products"
                 value={query}
