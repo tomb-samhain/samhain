@@ -10,6 +10,13 @@ update the checklists and the decisions log as you go.
 - **Out of scope: Koog AI meal planning.** Do not port `agent/`, `AgentController`, `MealPlanPage`,
   the `canUseAi` flag, the "Meal Plan" nav item, or the Gemini key. See [Excluded](#excluded-koog-ai).
 
+## Status (2026-10-04)
+
+Phases 0–7 are built on the `groceries-migration` branch: every page, the Kroger
+integration, and 176 tests (`npm test`: server, browser, and end-to-end). Phase 8 (running
+the import on the production H2 data and cutting over) needs production access and is
+not done. Deviations from the original plan are recorded in [§14](#14-decisions-log).
+
 ---
 
 ## Contents
@@ -120,72 +127,52 @@ Client entries (public/*.tsx) ──────▶ small JSON/HTML resource rou
   Shop page's exclude/restore and auto-submitting meal checkboxes, the auth-success banner timer,
   and pending-state buttons.
 
-### File layout
+### File layout (as built)
 
-Follows `AGENTS.md` and the routing guide (`node_modules/remix/guides/02-routing-and-controllers.md`):
-one directory per route map, route-local UI next to its controller, browser code in `public/`.
+Follows `AGENTS.md` and the routing guide: one directory per route map, route-local UI
+next to its controller, browser code in `public/` directories.
 
 ```txt
 app/
-├── routes.ts                         # adds: groceries: route('/groceries', groceryRoutes)
-├── router.ts                         # becomes createAppRouter(options) + exported `router`
-├── db.ts                             # createSqliteDatabase + migrateDatabase()
+├── routes.ts                           # groceries: route('/groceries', groceryRoutes)
+├── router.ts                           # createAppRouter({ db, sessionSecret?, kroger? })
+├── db.ts                               # openDatabase(), migrateDatabase()
 ├── middleware/
-│   ├── database.ts                   # context.db
-│   └── groceries-auth.ts             # session auth scheme + requireGroceriesUser()
+│   ├── database.ts                     # context.db
+│   ├── groceries-auth.ts               # session auth scheme, requireGroceriesUser(), currentUser()
+│   ├── kroger.ts                       # context.kroger (per-request Kroger client)
+│   └── trailing-slash.ts               # /groceries/ → /groceries
 ├── data/groceries/
-│   ├── tables.ts                     # data-table table() definitions (§4)
-│   ├── ingredients.ts                # parseIngredient(), consolidate()  ← pure, unit tested
-│   ├── meals.ts                      # owner-scoped queries/writes
-│   ├── orders.ts
-│   ├── users.ts                      # create/verify users, password hashing
-│   └── kroger/
-│       ├── client.ts                 # Kroger REST calls via injectable fetch
-│       ├── tokens.ts                 # client + user token cache/refresh
-│       └── oauth.ts                  # createOAuthProvider wrapper (PKCE)
+│   ├── tables.ts                       # data-table definitions (§4)
+│   ├── ingredients.ts                  # parseIngredient(), consolidate() (pure)
+│   ├── meals.ts  orders.ts  users.ts   # owner-scoped data access
+│   ├── passwords.ts                    # scrypt hashing
+│   └── kroger.ts                       # API client, token cache/refresh, OAuth provider
 └── actions/groceries/
-    ├── routes.ts                     # groceryRoutes (§7)
-    ├── controller.tsx                # top-level groceries leaves
-    ├── layout.tsx                    # GroceriesDocument + AppLayout header/nav
-    ├── ui/                           # Button, Badge, Card, Alert, Input, Table, Skeleton, icons
-    ├── auth/        controller.tsx  login-page.tsx
-    ├── meals/       controller.tsx  meals-page.tsx  public/{meal-card-menu,ingredient-row,new-meal-dialog}.tsx
-    ├── shop/        controller.tsx  shop-page.tsx   public/{meal-selector,consolidated-list}.tsx
-    ├── orders/      controller.tsx  orders-page.tsx
-    ├── settings/    controller.tsx  settings-page.tsx public/auth-banner.tsx
-    ├── kroger/      controller.tsx                  # products resource route, OAuth start/callback
-    └── public/      mobile-nav.tsx  product-search-popover.tsx  pending-button.tsx
-db/migrations/0001_create_groceries/{up,down}.sql
-test/                                 # shared helpers: test router, db fixtures, fake Kroger, cookies
-scripts/migrate-from-h2.ts            # one-time data import (§11)
+    ├── routes.ts                       # groceryRoutes (§7)
+    ├── controller.tsx                  # orders (the only direct leaf)
+    ├── layout.tsx                      # GroceriesLayout: Document + header + main
+    ├── form.ts                         # formText/formIds/done()/failJson() helpers
+    ├── auth/  meals/  shop/  settings/  orders/  kroger/   # controller + page + public/
+    └── public/                         # shared browser code
+        ├── ui/{styles.ts,icons.tsx,dialog.tsx,overlays.ts}
+        ├── nav.tsx  mobile-nav.tsx  pending-button.tsx  product-search.tsx  submit.ts
+public/groceries/theme.css              # tokens + preflight, layered before `rmx`
+db/migrations/0001_create_groceries/    # up.sql, down.sql
+scripts/                                # migrate-from-h2.ts, set-password.ts, set-kroger-config.ts
+test/                                   # db.ts, router.ts (createTestApp), fake-kroger.ts, fixtures/
 ```
-
-Shared browser code that several route areas use (product search popover, mobile nav) lives in
-`app/actions/groceries/public/`, which the asset server already allows (`app/**/public/**`). Keep
-browser modules free of server imports — they may import `app/routes.ts` for hrefs, nothing from
-`app/data/` or `app/db.ts`.
 
 ### Router factory
 
-Tests need fresh databases, memory sessions, and a fake Kroger. Convert `app/router.ts` to export a
-factory plus the production instance (the testing guide recommends this pattern):
+`app/router.ts` exports `createAppRouter({ db, sessionSecret?, kroger? })`; `server.ts` opens and
+migrates the database, then creates the router. Tests build their own with an in-memory
+database, a test secret, and the fake Kroger (`test/router.ts`).
 
-```ts
-// app/router.ts (shape, not final code)
-export interface AppRouterOptions {
-  db?: Database
-  sessionCookie?: Cookie
-  sessionStorage?: SessionStorage
-  krogerFetch?: typeof fetch   // swapped for a fake in tests
-  krogerRedirectUri?: string
-}
-export function createAppRouter(options: AppRouterOptions = {}) { /* middleware + router.map(...) */ }
-export const router = createAppRouter()
-```
-
-Middleware order: `staticFiles` → `cop()` → `loadDatabase()` → `session()` → `formData()` →
-`auth()` → `render({ assets })`. `requireAuth()` is attached per controller (it does **not** flow into
-nested controllers — attach it to every groceries controller except `auth`).
+Middleware order: `staticFiles` → `stripTrailingSlash()` → `cop()` → `loadDatabase()` →
+`session()` → `formData()` → `auth()` → `loadKroger()` → `render({ assets })`.
+`requireGroceriesUser()` is controller middleware on every groceries controller except `auth`
+(it does **not** flow into nested controllers); `kroger.products` uses the JSON-401 variant.
 
 ---
 
@@ -223,7 +210,8 @@ and `05-interactivity.md` before writing components. The traps for this port:
 Replace H2 with **SQLite via `remix/data-table/sqlite`** (Node's built-in `node:sqlite`; no extra
 dependency). Migrations live in `db/migrations/NNNN_name/{up,down}.sql` and run from `server.ts`
 before listening (`node_modules/remix/guides/08-data-and-validation.md`). Database file:
-`data/samhain.sqlite` (gitignored), overridable with `DATABASE_PATH`.
+`db/samhain.sqlite` (the starter already gitignores `db/*.sqlite`), overridable with
+`DATABASE_PATH`.
 
 > **Node version:** `package.json` declares `node >= 24.3.0`, but this machine runs Node 22.22.1.
 > `node:sqlite` works on 22.22, but install Node 24 before relying on it in production so the
@@ -579,8 +567,8 @@ Panel (`/groceries/meals/:mealId`):
     ✗, product name + change icon, or full-width "Link Kroger product".
   - Excluded items: desktop "Excluded from cart" row then struck-through rows at 40% opacity with
     Restore (RotateCcw); mobile card "Excluded from cart (N)" at 50% opacity.
-  - Exclusions are **client-only state** and reset when the selection changes (the source's
-    `excludedNames` set lived in component state). Keep them in the `ConsolidatedList` client entry.
+  - Exclusions are **client-only state** in the `ConsolidatedList` client entry. As in the
+    source, they survive selection changes and linking (the component stays mounted).
   - Footer alerts: destructive "Kroger account not connected. Go to Settings to connect." when no
     user token; default alert "N ingredient(s) without a linked product will not be added to cart."
     when any active item is unlinked.
@@ -715,15 +703,14 @@ runs with `npm test` (`remix test`); typecheck stays separate (`npm run typechec
 
 ### Test infrastructure (`test/`)
 
-- `test/router.ts` — `createTestRouter({ db?, kroger? })`: in-memory SQLite (`filename: ':memory:'`)
-  with migrations applied, memory session storage, test cookie secret, fake Kroger fetch.
-- `test/fixtures.ts` — `createUser`, `createMeal(userId, name, ingredients[])`, `signIn(router, email)`
-  returning a cookie header (see `getResponseCookie` in the testing guide).
+- `test/router.ts` — `createTestApp()`: in-memory SQLite with migrations applied, a test cookie
+  secret, and the fake Kroger injected as `fetch`; `app.fetch()`/`app.post()` send same-origin
+  requests. Also `signIn(app, email)`, `getResponseCookie()`, `connectKroger(app, userId)`.
+- `test/db.ts` — `createTestDatabase()`, `createUser()`, `createMealWith(db, userId, name, items[])`.
 - `test/fake-kroger.ts` — programmable fake for both injected `fetch` (router tests) and a local
   HTTP server (e2e, via `KROGER_API_BASE`): token endpoint (client + refresh + auth code), products,
   locations, `cart/add`; records requests so tests can assert on UPCs, Basic auth, PKCE verifier,
   and scopes. **Tests never call the real Kroger API.**
-- `remix.json` — test config (exclude `node_modules`, Playwright project `chromium`).
 - Dev dependency: `playwright` (`npm i -D playwright`). Chromium is already cached locally
   (`~/.cache/ms-playwright/chromium-1243`, works with Playwright 1.63).
 
@@ -785,56 +772,56 @@ Work on a feature branch and merge to `main` through a PR (see memory: branch-an
 Use `npm run hmr` for the dev server. Tick items here as they land.
 
 ### Phase 0 — Foundations
-- [ ] Branch `groceries-migration` from `main`
-- [ ] `npm i -D playwright`; add `remix.json` test config
-- [ ] Convert `app/router.ts` to `createAppRouter(options)` + `router`; existing tests still pass
-- [ ] `app/db.ts`, `db/migrations/0001_create_groceries`, `app/middleware/database.ts`, migrate on boot in `server.ts`; `data/` gitignored
-- [ ] `test/router.ts`, `test/fixtures.ts`, `test/fake-kroger.ts` skeletons
-- [ ] Env handling: `SESSION_SECRET`, `DATABASE_PATH`, `KROGER_REDIRECT_URI`, `KROGER_API_BASE`
+- [x] Branch `groceries-migration` from `main`
+- [x] `npm i -D playwright` (no `remix.json` needed; the defaults run Chromium)
+- [x] `app/router.ts` → `createAppRouter(options)`; `server.ts` opens and migrates the DB
+- [x] `app/db.ts`, `db/migrations/0001_create_groceries`, `app/middleware/database.ts`
+- [x] `test/db.ts`, `test/router.ts`, `test/fake-kroger.ts`
+- [x] Env: `SESSION_SECRET` (required in production), `DATABASE_PATH`, `KROGER_REDIRECT_URI`, `KROGER_API_BASE`
 
 ### Phase 1 — Domain logic and data access
-- [ ] `tables.ts` matching the migration
-- [ ] `parseIngredient`, `consolidate` + all golden/ported unit tests
-- [ ] Owner-scoped meal/ingredient/order functions + data tests (incl. cross-user isolation)
+- [x] `tables.ts` matching the migration
+- [x] `parseIngredient`, `consolidate` + golden and ported unit tests
+- [x] Owner-scoped meal/ingredient/order functions + data tests (incl. cross-user isolation)
 
 ### Phase 2 — Auth
-- [ ] Session cookie, `cop()`, `auth()` with session scheme, `requireAuth` redirect helper
-- [ ] Login/register/logout routes + login page (verbatim copy)
-- [ ] Password hashing (scrypt) + `scripts/set-password.ts`
-- [ ] Router tests: redirects, returnTo, errors, session rotation, logout
+- [x] Session cookie, `cop()`, `auth()` with session scheme, `requireAuth` redirect helper
+- [x] Login/register/logout routes + login page (verbatim copy)
+- [x] Password hashing (scrypt) + `scripts/set-password.ts`
+- [x] Router tests: redirects, returnTo, errors, cookie flags, cross-site rejection, logout
 
 ### Phase 3 — Shell and UI kit
-- [ ] `GroceriesDocument` with light tokens; leave Samhain pages on October Rust
-- [ ] UI primitives + icons
-- [ ] Header, desktop nav with active state, mobile sheet client entry
-- [ ] Browser test for the mobile sheet; visual check vs `mobile-menu.png`
+- [x] Groceries pages use `Document theme="none"` + `public/groceries/theme.css`; Samhain pages keep October Rust
+- [x] UI primitives + icons
+- [x] Header, desktop nav with active state, mobile sheet client entry
+- [x] Browser test for the mobile sheet; visual check vs `mobile-menu.png`
 
 ### Phase 4 — Meals
-- [ ] Meals page (list + panel), create/rename/delete dialogs, add ingredient
-- [ ] `IngredientRow` client entry: qty edit, full edit, delete
-- [ ] Router + browser tests; visual check vs meals screenshots (desktop and mobile)
+- [x] Meals page (list + panel), create/rename/delete dialogs, add ingredient
+- [x] `IngredientRow` client entry: qty edit, full edit, delete, link
+- [x] Router + browser tests; visual check vs meals screenshots (desktop and mobile)
 
 ### Phase 5 — Kroger + Settings
-- [ ] Kroger client, token cache/refresh, `hasToken` proactive refresh
-- [ ] OAuth provider + connect/callback routes (legacy callback path)
-- [ ] Settings page: location search/save, account card, success banner
-- [ ] Product search resource route + popover client entry; link from Meals
-- [ ] `scripts/set-kroger-config.ts`
-- [ ] Tests against the fake Kroger (incl. refresh 4xx deletes token)
+- [x] Kroger client, token cache/refresh, `hasToken` proactive refresh
+- [x] OAuth provider + connect/callback routes (legacy callback path)
+- [x] Settings page: location search/save, account card, success banner
+- [x] Product search resource route + popover; link from Meals
+- [x] `scripts/set-kroger-config.ts`
+- [x] Tests against the fake Kroger (incl. refresh 4xx deletes token, PKCE round trip, forged state)
 
 ### Phase 6 — Shop and Orders
-- [ ] Shop page with GET selection form + auto-submit client entry
-- [ ] `ConsolidatedList` client entry (exclude/restore), link across meals, cart POST + order record
-- [ ] Orders page with localized timestamps
-- [ ] Router + browser tests
+- [x] Shop page with GET selection form + auto-submit client entry
+- [x] `ConsolidatedList` client entry (exclude/restore), link across meals, cart POST + order record
+- [x] Orders page with localized timestamps
+- [x] Router + browser tests
 
 ### Phase 7 — End-to-end and parity review
-- [ ] The five e2e flows from §9
-- [ ] Side-by-side review with the source app (§13), desktop and mobile; fix and test differences
-- [ ] Resolve every row in §12 and record the outcome in §14
+- [x] E2E: meals/ingredients, Kroger connect + link + cart + orders, sign-in with returnTo, phone width
+- [x] Visual comparison with the reference screenshots, desktop and mobile
+- [x] §12 quirks resolved as recommended (§14)
 
 ### Phase 8 — Data migration and cutover
-- [ ] `scripts/migrate-from-h2.ts` + test with a fixture export
+- [x] `scripts/migrate-from-h2.ts` + tests against a real H2 export (`test/fixtures/h2-export/`)
 - [ ] Rehearse on a copy of the production H2 file
 - [ ] Cutover checklist (§11)
 
@@ -947,3 +934,14 @@ Record every decision that changes behavior relative to the source, with the dat
 | 2026-10-04 | Koog AI meal planning excluded | User requirement. |
 | 2026-10-04 | scrypt only, no BCrypt dependency; legacy user resets password via script | Only one existing user. |
 | 2026-10-04 | Quirks #1–#15 (§12) resolved as recommended | Approved by user. |
+| 2026-10-04 | Database file is `db/samhain.sqlite` | The starter already gitignores `db/*.sqlite`. |
+| 2026-10-04 | Login is two leaves (`login` GET, `loginAction` POST) instead of `form()` | Controllers own only direct leaves; a nested `form()` map would need its own controller. |
+| 2026-10-04 | "Connect with Kroger" is a POST form (`data-rmx-document`) | Starting OAuth changes session state; the response redirects off-site, so it must be a full document navigation. |
+| 2026-10-04 | Sign in rotates the session id with `session.regenerateId()` instead of `completeAuth()` | Sessions live in the cookie; `completeAuth()` also tries to delete the old id from storage and warns on every sign in. |
+| 2026-10-04 | Shop submits selected meals in list (name) order | A GET checkbox form posts in DOM order; the source used click order. Consolidated rows and recorded order names follow list order. |
+| 2026-10-04 | Shop exclusions persist across selection changes and links | That is what the source did (state outlived the selection), not what §7 first said. |
+| 2026-10-04 | Rename/delete return to the page the user was on | Matches the source, where renaming did not change the selection. |
+| 2026-10-04 | Popovers open with `popovertarget`, dialogs with `commandfor`/`command="show-modal"` | Triggers work before hydration; the e2e suite caught clicks landing before newly navigated client entries hydrated. Dialog forms also post without JavaScript. |
+| 2026-10-04 | Browser-only work (timers, `location`) runs in `ref()` callbacks | Component setup also runs during server rendering; a timer started in setup crashed the server. |
+| 2026-10-04 | GET paths with a trailing slash redirect (308) to the canonical path | Production URLs were `/groceries/…/`. |
+| 2026-10-04 | Meal pages title themselves `"<meal> · 5 Minute Groceries"` | Small improvement over the source's constant title; other pages use `"<Section> · 5 Minute Groceries"`. |
