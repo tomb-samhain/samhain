@@ -20,7 +20,7 @@ const row = css({
   cursor: 'pointer',
   transitionProperty: 'background-color',
   transitionDuration: '150ms',
-  '&:hover': { background: 'color-mix(in oklab, var(--accent) 50%, transparent)' },
+  '&:hover': { background: 'color-mix(in oklab, var(--accent-surface) 50%, transparent)' },
 })
 const rowName = css({
   flex: 1,

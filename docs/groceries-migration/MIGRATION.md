@@ -157,7 +157,7 @@ app/
     └── public/                         # shared browser code
         ├── ui/{styles.ts,icons.tsx,dialog.tsx,overlays.ts}
         ├── nav.tsx  mobile-nav.tsx  pending-button.tsx  product-search.tsx  submit.ts
-public/groceries/theme.css              # tokens + preflight, layered before `rmx`
+public/groceries/theme.css              # October Rust component tokens + preflight, layered before `rmx`
 db/migrations/0001_create_groceries/    # up.sql, down.sql
 scripts/                                # migrate-from-h2.ts, set-password.ts, set-kroger-config.ts
 test/                                   # db.ts, router.ts (createTestApp), fake-kroger.ts, fixtures/
@@ -616,34 +616,32 @@ Panel (`/groceries/meals/:mealId`):
 
 ## 8. Design system port (Tailwind/shadcn → `css()`)
 
-### Theme decision
+### Theme
 
-The Samhain site uses the "October Rust" dark theme, set on `<body>` in `app/actions/document.tsx`.
-The groceries UI is the default **shadcn "slate" light theme**. To recreate the UI faithfully, the
-groceries pages use their **own document shell and tokens**:
+The groceries pages started as a faithful port of the source's shadcn "slate" light theme and
+were then switched (2026-10-04) to the site-wide **October Rust** theme. They render through the
+standard `Document` (Syncopate/Archivo fonts, dark color scheme, palette variables on `<body>`)
+with `bodyClass="groceries"` and `public/groceries/theme.css`, which keeps the shadcn role names
+the components use and maps them onto the palette:
 
-- Add a `bodyMix`/`theme` prop to `Document` (or a `GroceriesDocument` in
-  `app/actions/groceries/layout.tsx` that shares the head logic) so groceries pages do not inherit
-  October Rust colors, fonts, or `color-scheme: dark`.
-- Define tokens as CSS custom properties on the groceries body (values from
-  `frontend/src/index.css`):
+| Component token | October Rust value | Used for |
+| --- | --- | --- |
+| `--background` | `--surface-0` (black) | page, inputs, dialogs |
+| `--card`, `--popover` | `--surface-3` | cards, popovers, meal rows |
+| `--foreground` | `--text-primary` | text |
+| `--muted-foreground` | `--text-secondary` | secondary text |
+| `--primary` / `--primary-foreground` | `--accent` (rust) / black | primary buttons, active nav, selected meal, checkboxes |
+| `--secondary`, `--muted`, `--accent-surface` | `--surface-4` | badges, hover surfaces |
+| `--border`, `--input` | `--border` | borders |
+| `--ring` | `--accent` | focus rings |
+| `--success*` | thorn greens (`--text-secondary`/`--text-primary`) | New/Add buttons, Connected badge, success banner, cart result |
+| `--destructive` | `#e0533d` | delete, errors, not-connected alert |
 
-| Token | Value |
-| --- | --- |
-| `--background` / `--card` / `--popover` | `hsl(0 0% 100%)` |
-| `--foreground` | `hsl(222.2 84% 4.9%)` |
-| `--primary` | `hsl(222.2 47.4% 11.2%)` |
-| `--primary-foreground` | `hsl(210 40% 98%)` |
-| `--secondary` / `--muted` / `--accent` | `hsl(210 40% 96.1%)` |
-| `--muted-foreground` | `hsl(215.4 16.3% 46.9%)` |
-| `--destructive` | `hsl(0 84.2% 60.2%)` |
-| `--border` / `--input` | `hsl(214.3 31.8% 91.4%)` |
-| `--ring` | `hsl(222.2 84% 4.9%)` |
-| `--radius` | `0.5rem` (`sm` = −4px, `md` = −2px, `lg` = radius) |
-| Extra colors used directly | green-600 `#16a34a`, green-700 `#15803d` (New/Add buttons); green-500 `#22c55e` (success badge); alert-success border `#22c55e`, text `#15803d`, bg `#f0fdf4` |
-
-The `.dark` palette exists in the source CSS but is never activated; skip it. Font: the source uses
-Tailwind's default system sans stack; do not load Syncopate/Archivo on groceries pages.
+shadcn's `--accent` (a hover surface) is renamed `--accent-surface` because October Rust uses
+`--accent` for the rust color. Headings, card and dialog titles, section labels, and the brand
+use the display face uppercase, like the home page; the page backdrop is the home page's radial
+gradient. Layout and spacing are unchanged from the source, so the reference screenshots still
+apply to structure but not color.
 
 ### Primitives (`app/actions/groceries/ui/`)
 
@@ -791,7 +789,7 @@ Use `npm run hmr` for the dev server. Tick items here as they land.
 - [x] Router tests: redirects, returnTo, errors, cookie flags, cross-site rejection, logout
 
 ### Phase 3 — Shell and UI kit
-- [x] Groceries pages use `Document theme="none"` + `public/groceries/theme.css`; Samhain pages keep October Rust
+- [x] Groceries pages use `Document` with `bodyClass="groceries"` + `public/groceries/theme.css` (October Rust tokens, §8)
 - [x] UI primitives + icons
 - [x] Header, desktop nav with active state, mobile sheet client entry
 - [x] Browser test for the mobile sheet; visual check vs `mobile-menu.png`
@@ -935,7 +933,7 @@ Record every decision that changes behavior relative to the source, with the dat
 | 2026-10-04 | Mount at `/groceries` in Samhain | Keeps production URLs and the registered Kroger redirect URI. |
 | 2026-10-04 | SQLite via `remix/data-table`; drop `oauth_pkce_state` | No extra deps; OAuth transaction lives in the session. |
 | 2026-10-04 | Session cookie auth replaces JWT/localStorage | Server rendering needs identity on every request; httpOnly is safer. |
-| 2026-10-04 | Groceries pages keep the shadcn slate light theme | "Recreate the UI faithfully"; Samhain pages keep October Rust. |
+| 2026-10-04 | ~~Groceries pages keep the shadcn slate light theme~~ | Superseded below. |
 | 2026-10-04 | Koog AI meal planning excluded | User requirement. |
 | 2026-10-04 | scrypt only, no BCrypt dependency; legacy user resets password via script | Only one existing user. |
 | 2026-10-04 | Quirks #1–#15 (§12) resolved as recommended | Approved by user. |
@@ -949,4 +947,5 @@ Record every decision that changes behavior relative to the source, with the dat
 | 2026-10-04 | Popovers open with `popovertarget`, dialogs with `commandfor`/`command="show-modal"` | Triggers work before hydration; the e2e suite caught clicks landing before newly navigated client entries hydrated. Dialog forms also post without JavaScript. |
 | 2026-10-04 | Browser-only work (timers, `location`) runs in `ref()` callbacks | Component setup also runs during server rendering; a timer started in setup crashed the server. |
 | 2026-10-04 | GET paths with a trailing slash redirect (308) to the canonical path | Production URLs were `/groceries/…/`. |
+| 2026-10-04 | Groceries pages use the October Rust theme (§8) | User request: match the rest of the site. Layout unchanged. |
 | 2026-10-04 | Meal pages title themselves `"<meal> · 5 Minute Groceries"` | Small improvement over the source's constant title; other pages use `"<Section> · 5 Minute Groceries"`. |

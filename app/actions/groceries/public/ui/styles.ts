@@ -49,7 +49,7 @@ const buttonVariants: Record<ButtonVariant, CSSProps> = {
   outline: {
     border: '1px solid var(--input)',
     background: 'var(--background)',
-    '&:hover': { background: 'var(--accent)', color: 'var(--accent-foreground)' },
+    '&:hover': { background: 'var(--accent-surface)', color: 'var(--accent-foreground)' },
   },
   secondary: {
     background: 'var(--secondary)',
@@ -57,18 +57,18 @@ const buttonVariants: Record<ButtonVariant, CSSProps> = {
     '&:hover': { background: alpha('var(--secondary)', 80) },
   },
   ghost: {
-    '&:hover': { background: 'var(--accent)', color: 'var(--accent-foreground)' },
+    '&:hover': { background: 'var(--accent-surface)', color: 'var(--accent-foreground)' },
   },
   link: {
     color: 'var(--primary)',
     textUnderlineOffset: '4px',
     '&:hover': { textDecoration: 'underline' },
   },
-  // The source's `bg-green-600 hover:bg-green-700 text-white` overrides for New/Add.
+  // The source's green New/Add buttons (`bg-green-600 hover:bg-green-700 text-white`).
   green: {
-    background: 'var(--green-600)',
-    color: 'white',
-    '&:hover': { background: 'var(--green-700)' },
+    background: 'var(--success)',
+    color: 'var(--success-foreground)',
+    '&:hover': { background: 'var(--success-hover)' },
   },
 }
 
@@ -130,8 +130,16 @@ const badgeVariants: Record<BadgeVariant, CSSProps> = {
     color: 'var(--destructive-foreground)',
   },
   outline: { color: 'var(--foreground)' },
-  success: { borderColor: 'transparent', background: 'var(--green-500)', color: 'white' },
-  warning: { borderColor: 'transparent', background: 'var(--yellow-500)', color: 'white' },
+  success: {
+    borderColor: 'transparent',
+    background: 'var(--success)',
+    color: 'var(--success-foreground)',
+  },
+  warning: {
+    borderColor: 'transparent',
+    background: 'var(--warning)',
+    color: 'var(--warning-foreground)',
+  },
 }
 
 export const badge = memo((variant: BadgeVariant = 'default', extra?: CSSProps) => ({
@@ -178,11 +186,18 @@ export const cardHeader = css({
   gap: '0.375rem',
   padding: '1.5rem',
 })
+// Headings use the October Rust display face (Syncopate), uppercase, like the home page.
+const display = {
+  fontFamily: 'var(--font-display)',
+  fontWeight: 700,
+  textTransform: 'uppercase',
+} as const
+
 export const cardTitle = css({
-  fontSize: '1.5rem',
-  lineHeight: 1,
-  fontWeight: 600,
-  letterSpacing: '-0.025em',
+  ...display,
+  fontSize: '1.125rem',
+  lineHeight: 1.2,
+  letterSpacing: '0.06em',
 })
 export const cardDescription = css({
   fontSize: '0.875rem',
@@ -211,12 +226,12 @@ export const alert = memo((variant: 'default' | 'destructive' | 'success' = 'def
     color: 'var(--destructive)',
     '& > svg': { position: 'absolute', left: '1rem', top: '1rem', color: 'var(--destructive)' },
   }),
-  // The source's `border-green-500 text-green-700 bg-green-50` override.
+  // The source's green success banner (`border-green-500 text-green-700 bg-green-50`).
   ...(variant === 'success' && {
-    borderColor: 'var(--green-500)',
-    color: 'var(--green-700)',
-    background: 'var(--green-50)',
-    '& > svg': { position: 'absolute', left: '1rem', top: '1rem', color: 'var(--green-600)' },
+    borderColor: 'var(--success)',
+    color: 'var(--success-strong)',
+    background: 'var(--success-subtle)',
+    '& > svg': { position: 'absolute', left: '1rem', top: '1rem', color: 'var(--success)' },
   }),
 }))
 export const alertDescription = css({ fontSize: '0.875rem', lineHeight: '1.25rem' })
@@ -251,14 +266,20 @@ export const textXsDestructive = css({
   lineHeight: '1rem',
   color: 'var(--destructive)',
 })
-export const pageTitle = css({ fontSize: '1.5rem', lineHeight: '2rem', fontWeight: 700 })
+export const pageTitle = css({
+  ...display,
+  fontSize: '1.375rem',
+  lineHeight: '2rem',
+  letterSpacing: '0.06em',
+  color: 'var(--text-primary)',
+})
+// Like the home page's "Side A" label.
 export const sectionLabel = css({
-  fontSize: '0.875rem',
+  ...display,
+  fontSize: '0.8125rem',
   lineHeight: '1.25rem',
-  fontWeight: 600,
-  color: 'var(--muted-foreground)',
-  textTransform: 'uppercase',
-  letterSpacing: '0.025em',
+  letterSpacing: '0.2em',
+  color: 'var(--accent)',
   marginBottom: '0.75rem',
 })
 
@@ -304,10 +325,10 @@ export const dialogHeader = css({
   [sm]: { textAlign: 'left' },
 })
 export const dialogTitle = css({
-  fontSize: '1.125rem',
-  lineHeight: 1,
-  fontWeight: 600,
-  letterSpacing: '-0.025em',
+  ...display,
+  fontSize: '1rem',
+  lineHeight: 1.2,
+  letterSpacing: '0.06em',
 })
 export const dialogFooter = css({
   display: 'flex',
@@ -360,7 +381,7 @@ export const menuItem = memo((destructive: boolean) => ({
   transitionDuration: '150ms',
   color: destructive ? 'var(--destructive)' : undefined,
   '&:hover, &:focus-visible': {
-    background: 'var(--accent)',
+    background: 'var(--accent-surface)',
     color: destructive ? 'var(--destructive)' : 'var(--accent-foreground)',
   },
   '& svg': { marginRight: '0.5rem' },
@@ -372,7 +393,7 @@ export const menuSeparator = css({
 })
 
 const checkSvg = encodeURIComponent(
-  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='hsl(210 40% 98%)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M20 6 9 17l-5-5'/></svg>",
+  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M20 6 9 17l-5-5'/></svg>",
 )
 
 export const checkbox = css({

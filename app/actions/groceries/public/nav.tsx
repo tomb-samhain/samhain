@@ -42,7 +42,7 @@ const activeStyle = css({
 const inactiveStyle = css({
   ...navItemBase,
   color: 'var(--muted-foreground)',
-  '&:hover': { color: 'var(--foreground)', background: 'var(--accent)' },
+  '&:hover': { color: 'var(--foreground)', background: 'var(--accent-surface)' },
 })
 
 export function NavItem(handle: Handle<{ item: (typeof navItems)[number]; active: boolean }>) {
@@ -74,7 +74,7 @@ export const signOutButton = css({
   cursor: 'pointer',
   transitionProperty: 'color, background-color',
   transitionDuration: '150ms',
-  '&:hover': { color: 'var(--foreground)', background: 'var(--accent)' },
+  '&:hover': { color: 'var(--foreground)', background: 'var(--accent-surface)' },
 })
 
 export const headerStyle = css({

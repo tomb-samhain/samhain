@@ -24,7 +24,13 @@ export const container = css({
 
 const headerRow = css({ display: 'flex', height: '3.5rem', alignItems: 'center', gap: '0.5rem' })
 const brand = css({
-  fontWeight: 600,
+  fontFamily: 'var(--font-display)',
+  fontSize: '0.8125rem',
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.12em',
+  color: 'var(--accent)',
+  whiteSpace: 'nowrap',
   marginRight: '0.5rem',
   '@media (min-width: 768px)': { marginRight: '1rem' },
 })
@@ -40,6 +46,11 @@ const desktopUser = css({
   alignItems: 'center',
   gap: '0.75rem',
   '@media (min-width: 768px)': { display: 'flex' },
+})
+// The same backdrop as the home and track pages.
+const page = css({
+  minHeight: '100vh',
+  background: 'radial-gradient(ellipse at top, var(--surface-3), var(--surface-0) 70%)',
 })
 const mainStyle = css({ paddingBlock: '1.5rem' })
 
@@ -59,11 +70,10 @@ export function GroceriesLayout(handle: Handle<GroceriesLayoutProps>) {
     return (
       <Document
         title={title}
-        theme="none"
         bodyClass="groceries"
         head={<link rel="stylesheet" href="/groceries/theme.css" />}
       >
-        <div mix={css({ minHeight: '100vh', background: 'var(--background)' })}>
+        <div mix={page}>
           <header mix={headerStyle}>
             <div mix={[container, headerRow]}>
               <span mix={brand}>{APP_TITLE}</span>

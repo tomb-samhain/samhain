@@ -54,7 +54,7 @@ const iconMd: Parameters<typeof button>[0] = {
 }
 const destructiveExtra = {
   color: 'var(--destructive)',
-  '&:hover': { background: 'var(--accent)', color: 'var(--destructive)' },
+  '&:hover': { background: 'var(--accent-surface)', color: 'var(--destructive)' },
 }
 const linkButton: Parameters<typeof button>[0] = {
   variant: 'outline',

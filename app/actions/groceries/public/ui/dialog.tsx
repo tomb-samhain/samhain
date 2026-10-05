@@ -136,6 +136,13 @@ export function NameForm(handle: Handle<NameFormProps>) {
   }
 }
 
+// Triggers use commandfor/command="show-modal"; this covers browsers without invoker
+// commands (and runs harmlessly after the native command in those that have them).
 export function openDialog(dialog: HTMLDialogElement | undefined) {
-  if (dialog && !dialog.open) dialog.showModal()
+  if (!dialog || dialog.open || supportsInvokerCommands()) return
+  dialog.showModal()
+}
+
+export function supportsInvokerCommands() {
+  return 'command' in HTMLButtonElement.prototype
 }

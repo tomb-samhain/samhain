@@ -4,7 +4,7 @@ import type { Handle } from 'remix/component'
 import type { OrderSummary } from '../../../data/groceries/orders.ts'
 import type { CurrentUser } from '../../../data/groceries/users.ts'
 import { GroceriesLayout } from '../layout.tsx'
-import { textSmMuted } from '../public/ui/styles.ts'
+import { pageTitle, textSmMuted } from '../public/ui/styles.ts'
 import { LocalTime } from './public/local-time.tsx'
 
 // OrdersPage.tsx: the five most recent cart submissions.
@@ -35,9 +35,7 @@ export function OrdersPage(handle: Handle<{ user: CurrentUser; orders: OrderSumm
               gap: '1rem',
             })}
           >
-            <h1 mix={css({ fontSize: '1.5rem', lineHeight: '2rem', fontWeight: 600 })}>
-              Recent Orders
-            </h1>
+            <h1 mix={pageTitle}>Recent Orders</h1>
             <div mix={css({ display: 'flex', flexDirection: 'column', gap: '0.75rem' })}>
               {orders.map((order) => (
                 <div

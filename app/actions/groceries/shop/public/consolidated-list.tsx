@@ -121,7 +121,7 @@ const success = css({
   fontSize: '0.875rem',
   lineHeight: '1.25rem',
   fontWeight: 500,
-  color: 'var(--green-600)',
+  color: 'var(--success)',
 })
 const failure = css({ fontSize: '0.875rem', lineHeight: '1.25rem', color: 'var(--destructive)' })
 const empty = css({
@@ -142,7 +142,7 @@ const removeButton: ButtonOptions = {
     height: '1.5rem',
     width: '1.5rem',
     color: 'var(--muted-foreground)',
-    '&:hover': { background: 'var(--accent)', color: 'var(--destructive)' },
+    '&:hover': { background: 'var(--accent-surface)', color: 'var(--destructive)' },
   },
 }
 const smallIcon: ButtonOptions = {

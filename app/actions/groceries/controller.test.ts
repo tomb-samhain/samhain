@@ -105,12 +105,12 @@ describe('groceries access control', () => {
     }
   })
 
-  it('does not apply the October Rust theme to groceries pages', async () => {
+  it('uses the October Rust theme like the rest of the site', async () => {
     let app = await createTestApp()
     let html = await (await app.fetch(routes.groceries.auth.login.href())).text()
-    assert.match(html, /<body class="groceries">/)
-    assert.match(html, /<meta name="color-scheme" content="light"/)
-    assert.doesNotMatch(html, /fonts\.googleapis\.com/)
+    assert.match(html, /<body class="groceries rmxc-[^"]+">/)
+    assert.match(html, /<meta name="color-scheme" content="dark"/)
+    assert.match(html, /fonts\.googleapis\.com\/css2\?family=Syncopate/)
     assert.match(html, /href="\/groceries\/theme\.css"/)
   })
 })

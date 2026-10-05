@@ -1,50 +1,51 @@
 /*
- * Global stylesheet for /groceries pages: the shadcn "slate" light tokens from the source
- * app's index.css plus the parts of Tailwind's preflight its markup relies on. The `base`
- * layer sits before Remix's `rmx` layer so component css() rules always win.
+ * Global stylesheet for /groceries pages: October Rust component tokens plus the parts of
+ * Tailwind's preflight the ported markup relies on. The `base` layer sits before Remix's
+ * `rmx` layer so component css() rules always win.
  */
 @layer base, rmx;
 
 @layer base {
+  /*
+   * Component tokens (named after the shadcn roles the UI was ported from) mapped onto the
+   * October Rust palette that Document sets on <body> (--surface-*, --text-*, --border,
+   * --accent, --font-*).
+   */
   .groceries {
-    --background: hsl(0 0% 100%);
-    --foreground: hsl(222.2 84% 4.9%);
-    --card: hsl(0 0% 100%);
-    --card-foreground: hsl(222.2 84% 4.9%);
-    --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(222.2 84% 4.9%);
-    --primary: hsl(222.2 47.4% 11.2%);
-    --primary-foreground: hsl(210 40% 98%);
-    --secondary: hsl(210 40% 96.1%);
-    --secondary-foreground: hsl(222.2 47.4% 11.2%);
-    --muted: hsl(210 40% 96.1%);
-    --muted-foreground: hsl(215.4 16.3% 46.9%);
-    --accent: hsl(210 40% 96.1%);
-    --accent-foreground: hsl(222.2 47.4% 11.2%);
-    --destructive: hsl(0 84.2% 60.2%);
-    --destructive-foreground: hsl(210 40% 98%);
-    --border: hsl(214.3 31.8% 91.4%);
-    --input: hsl(214.3 31.8% 91.4%);
-    --ring: hsl(222.2 84% 4.9%);
+    --background: var(--surface-0);
+    --foreground: var(--text-primary);
+    --card: var(--surface-3);
+    --card-foreground: var(--text-primary);
+    --popover: var(--surface-3);
+    --popover-foreground: var(--text-primary);
+    --primary: var(--accent);
+    --primary-foreground: var(--surface-0);
+    --secondary: var(--surface-4);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--surface-4);
+    --muted-foreground: var(--text-secondary);
+    --accent-surface: var(--surface-4);
+    --accent-foreground: var(--text-primary);
+    --destructive: #e0533d;
+    --destructive-foreground: var(--surface-0);
+    --input: var(--border);
+    --ring: var(--accent);
     --radius: 0.5rem;
-    --green-50: oklch(98.2% 0.018 155.826);
-    --green-500: oklch(72.3% 0.219 149.579);
-    --green-600: oklch(62.7% 0.194 149.214);
-    --green-700: oklch(52.7% 0.154 150.069);
-    --yellow-500: oklch(79.5% 0.184 86.047);
-    --font-sans:
-      ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-      'Segoe UI Symbol', 'Noto Color Emoji';
+    /* Positive actions (New, Add) and success states use the thorn green. */
+    --success: var(--text-secondary);
+    --success-hover: var(--text-primary);
+    --success-foreground: var(--surface-0);
+    --success-subtle: var(--surface-3);
+    --success-strong: var(--text-primary);
+    --warning: var(--accent);
+    --warning-foreground: var(--surface-0);
 
     margin: 0;
     min-height: 100vh;
-    background-color: var(--background);
-    color: var(--foreground);
-    font-family: var(--font-sans);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color-scheme: light;
+    color-scheme: dark;
   }
 
   .groceries *,

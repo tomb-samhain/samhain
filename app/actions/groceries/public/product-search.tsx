@@ -65,7 +65,7 @@ const resultButton = css({
   gap: '0.5rem',
   cursor: 'pointer',
   transition: 'background-color 150ms',
-  '&:hover': { background: 'var(--accent)' },
+  '&:hover': { background: 'var(--accent-surface)' },
   '&:disabled': { opacity: 0.5, cursor: 'not-allowed' },
 })
 

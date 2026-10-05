@@ -4,6 +4,7 @@ import type { Handle } from 'remix/component'
 import { routes } from '../../../routes.ts'
 import { APP_TITLE, GroceriesLayout } from '../layout.tsx'
 import { PendingButton } from '../public/pending-button.tsx'
+import { pageTitle } from '../public/ui/styles.ts'
 
 export type LoginMode = 'signin' | 'register'
 
@@ -45,7 +46,6 @@ export function LoginPage(handle: Handle<LoginPageProps>) {
         <div
           mix={css({
             minHeight: '100vh',
-            background: 'var(--background)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -65,9 +65,7 @@ export function LoginPage(handle: Handle<LoginPageProps>) {
             })}
           >
             <div>
-              <h1 mix={css({ fontSize: '1.5rem', lineHeight: '2rem', fontWeight: 600 })}>
-                {APP_TITLE}
-              </h1>
+              <h1 mix={pageTitle}>{APP_TITLE}</h1>
               <p
                 mix={css({
                   fontSize: '0.875rem',

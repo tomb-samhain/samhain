@@ -3,6 +3,7 @@ import type { Handle } from 'remix/component'
 
 import { NavItem, navItems, type NavKey } from './nav.tsx'
 import { LogOut, Menu, X } from './ui/icons.tsx'
+import { openDialog } from './ui/dialog.tsx'
 import { dialogClose } from './ui/styles.ts'
 
 export interface MobileNavProps {
@@ -19,7 +20,7 @@ const triggerStyle = css({
   cursor: 'pointer',
   transitionProperty: 'color, background-color',
   transitionDuration: '150ms',
-  '&:hover': { color: 'var(--foreground)', background: 'var(--accent)' },
+  '&:hover': { color: 'var(--foreground)', background: 'var(--accent-surface)' },
   '@media (min-width: 768px)': { display: 'none' },
 })
 
@@ -36,7 +37,7 @@ const sheetSignOut = css({
   cursor: 'pointer',
   transitionProperty: 'color, background-color',
   transitionDuration: '150ms',
-  '&:hover': { color: 'var(--foreground)', background: 'var(--accent)' },
+  '&:hover': { color: 'var(--foreground)', background: 'var(--accent-surface)' },
 })
 
 const sheetStyle = css({

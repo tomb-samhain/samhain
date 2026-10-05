@@ -72,7 +72,7 @@ const mealCardBase = {
 const mealCard = css({
   ...mealCardBase,
   background: 'var(--card)',
-  '&:hover': { background: 'var(--accent)' },
+  '&:hover': { background: 'var(--accent-surface)' },
 })
 const mealCardSelected = css({
   ...mealCardBase,
@@ -110,7 +110,7 @@ const backLink = css({
   color: 'var(--muted-foreground)',
   transitionProperty: 'color, background-color',
   transitionDuration: '150ms',
-  '&:hover': { color: 'var(--foreground)', background: 'var(--accent)' },
+  '&:hover': { color: 'var(--foreground)', background: 'var(--accent-surface)' },
   [md]: { display: 'none' },
 })
 const panelBody = css({
