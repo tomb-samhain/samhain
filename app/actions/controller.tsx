@@ -4,6 +4,7 @@ import { assets } from '../assets.ts'
 import { routes } from '../routes.ts'
 import { tracks } from '../tracks.ts'
 import { HomePage } from './home-page.tsx'
+import { ProjectList } from './project-list.tsx'
 import { TrackPage } from './track-page.tsx'
 
 export default createController(routes, {
@@ -21,7 +22,11 @@ export default createController(routes, {
       return context.render(<TrackPage track={tracks.blog} />)
     },
     projects(context) {
-      return context.render(<TrackPage track={tracks.projects} />)
+      return context.render(
+        <TrackPage track={tracks.projects}>
+          <ProjectList />
+        </TrackPage>,
+      )
     },
   },
 })

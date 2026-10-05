@@ -1,14 +1,14 @@
-import type { Handle } from 'remix/component'
+import type { Handle, RemixNode } from 'remix/component'
 import { css } from 'remix/component'
 
 import { routes } from '../routes.ts'
 import { trackNumber, type Track } from '../tracks.ts'
 import { Document } from './document.tsx'
 
-// Placeholder page shared by every track until each one gets real content.
-export function TrackPage(handle: Handle<{ track: Track }>) {
+// Page shell shared by every track. Tracks without content yet show a placeholder.
+export function TrackPage(handle: Handle<{ track: Track; children?: RemixNode }>) {
   return () => {
-    let { track } = handle.props
+    let { track, children } = handle.props
 
     return (
       <Document title={`${track.title} · Samhain`}>
@@ -73,7 +73,9 @@ export function TrackPage(handle: Handle<{ track: Track }>) {
             >
               {track.title}
             </h1>
-            <p mix={css({ margin: 0, color: 'var(--text-secondary)' })}>Nothing here yet.</p>
+            {children ?? (
+              <p mix={css({ margin: 0, color: 'var(--text-secondary)' })}>Nothing here yet.</p>
+            )}
           </article>
         </main>
       </Document>

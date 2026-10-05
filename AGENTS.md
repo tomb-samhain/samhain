@@ -24,7 +24,7 @@ Refer to ./.agents/skills/remix/SKILL.md for the Remix mental model and how to f
 - `app/routes.ts` defines the shared route contract used by server and browser modules for type-safe hrefs
 - `app/router.ts` exports `createAppRouter({ db, ... })`, which installs middleware (database, cookie session, auth, Kroger client, renderer) and maps controllers; `server.ts` opens and migrates the SQLite database (`app/db.ts`, `db/migrations/`) before creating it
 - Put top-level route actions in `app/actions/controller.tsx`; add `app/actions/<route-key>/controller.tsx` for nested route maps. `app/actions/controller.test.ts` is the root controller's router smoke test
-- `app/tracks.ts` lists the tracklist pages (title, number, href); `app/actions/track-page.tsx` is their shared placeholder page
+- `app/tracks.ts` lists the tracklist pages (title, number, href); `app/actions/track-page.tsx` is their shared page shell (pass children for content; tracks without any show a placeholder). `app/actions/project-list.tsx` lists projects on the Projects track, starting with the groceries app
 - `app/actions/home-page.tsx` renders the home page; `app/actions/document.tsx` owns the HTML shell and the global October Rust theme (color tokens and fonts on `<body>`). `bodyClass` lets a section scope extra styles (groceries uses it)
 - `app/actions/public/` contains the browser runtime entry (needed for HMR and any future client components)
 - `app/assets.ts` owns the server-side asset pipeline used by the asset route and render middleware

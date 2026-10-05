@@ -39,4 +39,18 @@ describe('root controller', () => {
       assert.match(body, new RegExp(`Track ${trackNumber(track)}`))
     })
   }
+
+  it('GET /projects links to the groceries app', async () => {
+    let response = await router.fetch(new URL(routes.projects.href(), 'http://localhost'))
+    let body = await response.text()
+
+    assert.match(body, new RegExp(`href="${routes.groceries.meals.index.href()}"`))
+    assert.match(body, />5 Minute Groceries</)
+    assert.doesNotMatch(body, /Nothing here yet/)
+  })
+
+  it('GET /about still shows the placeholder', async () => {
+    let response = await router.fetch(new URL(routes.about.href(), 'http://localhost'))
+    assert.match(await response.text(), /Nothing here yet/)
+  })
 })
