@@ -1,0 +1,138 @@
+/*
+ * Global stylesheet for /groceries pages: October Rust component tokens plus the parts of
+ * Tailwind's preflight the ported markup relies on. The `base` layer sits before Remix's
+ * `rmx` layer so component css() rules always win.
+ */
+@layer base, rmx;
+
+@layer base {
+  /*
+   * Component tokens (named after the shadcn roles the UI was ported from) mapped onto the
+   * October Rust palette that Document sets on <body> (--surface-*, --text-*, --border,
+   * --accent, --font-*).
+   */
+  .groceries {
+    --background: var(--surface-0);
+    --foreground: var(--text-primary);
+    --card: var(--surface-3);
+    --card-foreground: var(--text-primary);
+    --popover: var(--surface-3);
+    --popover-foreground: var(--text-primary);
+    --primary: var(--accent);
+    --primary-foreground: var(--surface-0);
+    --secondary: var(--surface-4);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--surface-4);
+    --muted-foreground: var(--text-secondary);
+    --accent-surface: var(--surface-4);
+    --accent-foreground: var(--text-primary);
+    --destructive: #e0533d;
+    --destructive-foreground: var(--surface-0);
+    --input: var(--border);
+    --ring: var(--accent);
+    --radius: 0.5rem;
+    /* Positive actions (New, Add) and success states use the thorn green. */
+    --success: var(--text-secondary);
+    --success-hover: var(--text-primary);
+    --success-foreground: var(--surface-0);
+    --success-subtle: var(--surface-3);
+    --success-strong: var(--text-primary);
+    --warning: var(--accent);
+    --warning-foreground: var(--surface-0);
+
+    margin: 0;
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color-scheme: dark;
+  }
+
+  .groceries *,
+  .groceries ::before,
+  .groceries ::after,
+  .groceries ::backdrop {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid var(--border);
+  }
+
+  .groceries h1,
+  .groceries h2,
+  .groceries h3,
+  .groceries h4 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  .groceries a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+  .groceries ol,
+  .groceries ul {
+    list-style: none;
+  }
+  .groceries img,
+  .groceries svg {
+    display: block;
+    vertical-align: middle;
+  }
+  .groceries img {
+    max-width: 100%;
+    height: auto;
+  }
+  .groceries table {
+    border-collapse: collapse;
+    text-indent: 0;
+    border-color: inherit;
+  }
+  .groceries button,
+  .groceries input,
+  .groceries select,
+  .groceries textarea {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    background-color: transparent;
+    border-radius: 0;
+  }
+  .groceries button {
+    cursor: default;
+  }
+  .groceries ::placeholder {
+    color: var(--muted-foreground);
+    opacity: 1;
+  }
+  .groceries [hidden]:where(:not([hidden='until-found'])) {
+    display: none !important;
+  }
+  .groceries dialog,
+  .groceries [popover] {
+    color: inherit;
+    background: transparent;
+  }
+
+  .groceries .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  @keyframes groceries-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes groceries-pulse {
+    50% {
+      opacity: 0.5;
+    }
+  }
+}

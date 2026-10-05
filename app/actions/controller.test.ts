@@ -1,11 +1,16 @@
 import * as assert from 'remix/assert'
-import { describe, it } from 'remix/test'
+import { before, describe, it } from 'remix/test'
 
-import { router } from '../router.ts'
+import { createTestApp } from '../../test/router.ts'
 import { routes } from '../routes.ts'
 import { trackNumber, tracklist } from '../tracks.ts'
 
 describe('root controller', () => {
+  let router: Awaited<ReturnType<typeof createTestApp>>['router']
+  before(async () => {
+    router = (await createTestApp()).router
+  })
+
   it('GET / returns the home page', async () => {
     let response = await router.fetch(new URL(routes.home.href(), 'http://localhost'))
 
@@ -34,4 +39,18 @@ describe('root controller', () => {
       assert.match(body, new RegExp(`Track ${trackNumber(track)}`))
     })
   }
+
+  it('GET /projects links to the groceries app', async () => {
+    let response = await router.fetch(new URL(routes.projects.href(), 'http://localhost'))
+    let body = await response.text()
+
+    assert.match(body, new RegExp(`href="${routes.groceries.meals.index.href()}"`))
+    assert.match(body, />5 Minute Groceries</)
+    assert.doesNotMatch(body, /Nothing here yet/)
+  })
+
+  it('GET /about still shows the placeholder', async () => {
+    let response = await router.fetch(new URL(routes.about.href(), 'http://localhost'))
+    assert.match(await response.text(), /Nothing here yet/)
+  })
 })

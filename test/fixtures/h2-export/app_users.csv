@@ -1,0 +1,2 @@
+"ID","CAN_USE_AI","PASSWORD_HASH","USERNAME"
+"1","FALSE","$2a$10$fixture-bcrypt-hash-not-real","demo@example.com"

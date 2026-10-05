@@ -1,13 +1,18 @@
 import * as http from 'node:http'
 import { createRequestListener } from 'remix/node-fetch-server'
 
-import { router } from './app/router.ts'
+import { migrateDatabase, openDatabase } from './app/db.ts'
+import { createAppRouter } from './app/router.ts'
 
 const port = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 44100
 const hmrProxyPort = process.env.HMR_PROXY_PORT
   ? Number.parseInt(process.env.HMR_PROXY_PORT, 10)
   : null
 const isHmr = process.env.REMIX_NODE_HMR === '1'
+
+const db = openDatabase()
+await migrateDatabase(db)
+const router = createAppRouter({ db })
 
 const server = http.createServer(createRequestListener(router.fetch, { trustProxy: isHmr }))
 
@@ -27,7 +32,9 @@ function shutdown() {
   }
 
   shuttingDown = true
-  server.close(() => process.exit(0))
+  server.close(() => {
+    db.close().finally(() => process.exit(0))
+  })
   server.closeAllConnections()
 }
 

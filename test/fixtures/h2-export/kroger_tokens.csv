@@ -1,0 +1,3 @@
+"ID","ACCESS_TOKEN","EXPIRES_AT","GRANT_TYPE","REFRESH_TOKEN","USER_ID"
+"1","user-access","2026-10-04 21:00:00+00","USER","user-refresh","1"
+"2","client-access","2026-10-04 21:00:00+00","CLIENT",,"1"

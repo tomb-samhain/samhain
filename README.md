@@ -1,6 +1,8 @@
 # Samhain
 
-A minimal Remix application starter with a home page.
+A Remix application: the Samhain home page and track pages, plus 5 Minute Groceries at
+`/groceries` (meal planning with a Kroger shopping cart, ported from a Spring + React app; see
+`docs/groceries-migration/MIGRATION.md`).
 
 ## Starter Shape
 
@@ -29,3 +31,16 @@ npm run start
 npm test
 npm run typecheck
 ```
+
+`npm test` runs server, browser, and end-to-end tests; browser and end-to-end tests need
+Playwright's Chromium (`npx playwright install chromium`).
+
+## Groceries setup
+
+```sh
+export SESSION_SECRET=...                   # required in production
+node --import remix/node-tsx scripts/set-kroger-config.ts you@example.com <client-id> <client-secret>
+```
+
+Register `<origin>/groceries/api/kroger/auth/callback` as a redirect URI in the Kroger developer
+app, or set `KROGER_REDIRECT_URI`.

@@ -8,6 +8,8 @@ export interface DocumentProps {
   children?: RemixNode
   head?: RemixNode
   title?: string
+  // Lets a section (like /groceries) scope its own stylesheet under the global theme.
+  bodyClass?: string
 }
 
 // Global theme sampled from Type O Negative's "October Rust" (1996) cover:
@@ -40,7 +42,7 @@ const DEFAULT_TITLE = readAppDisplayName('Samhain')
 
 export function Document(handle: Handle<DocumentProps>) {
   return () => {
-    let { children, head, title = DEFAULT_TITLE } = handle.props
+    let { children, head, title = DEFAULT_TITLE, bodyClass } = handle.props
     let { href, importMap, preloads } = scriptEntry
 
     return (
@@ -61,7 +63,9 @@ export function Document(handle: Handle<DocumentProps>) {
           ))}
           <script type="module" src={href}></script>
         </head>
-        <body mix={themeStyle}>{children}</body>
+        <body class={bodyClass} mix={themeStyle}>
+          {children}
+        </body>
       </html>
     )
   }
