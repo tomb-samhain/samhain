@@ -831,8 +831,13 @@ Use `npm run hmr` for the dev server. Tick items here as they land.
 
 ### Export from H2
 
-The source DB is an H2 file (`data/groceries.mv.db`; the local copy is empty — real data is on the
-production host under `/opt/groceries`). Export with the H2 jar already in the Gradle cache:
+The source DB is an H2 file. The local copy is empty; production data is at
+**`/opt/groceries/data/groceries.mv.db`** on `216.128.137.221` (confirmed 2026-10-04: the
+`groceries` systemd unit runs with `WorkingDirectory=/opt/groceries`, `--spring.profiles.active=prod`,
+and secrets from `/etc/groceries/secrets.env`, so `jdbc:h2:file:./data/groceries` resolves there).
+The same directory holds manual backups from 2026-05-14 (`groceries.mv.db.bak-*`) and an H2
+`groceries.trace.db`. Stop the service before copying the file (`systemctl stop groceries`); H2
+holds a lock while it runs. Export with the H2 jar already in the Gradle cache:
 
 ```sh
 H2=$(ls ~/.gradle/caches/modules-2/files-2.1/com.h2database/h2/2.4.240/*/h2-2.4.240.jar)
